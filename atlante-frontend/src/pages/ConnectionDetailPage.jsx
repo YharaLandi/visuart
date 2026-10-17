@@ -168,7 +168,7 @@ export default function ConnectionDetailPage() {
             <div className="author-row">
               <Avatar name={author} size="sm" />
               <div>
-                <strong>{author}</strong>
+                <strong>{conn.authorUsername ? <Link to={`/utenti/${conn.authorUsername}`} className="author-link">{author}</Link> : author}</strong>
                 <small>{ROLE_LABEL[conn.authorRole] ?? 'Curatore'} · Pubblicato il {longDate(conn.createdAt)}</small>
               </div>
               {conn.authorUsername && !isMine && (

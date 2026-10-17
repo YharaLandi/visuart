@@ -13,6 +13,7 @@ import NewCritiquePage from './pages/NewCritiquePage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
+import UserProfilePage from './pages/UserProfilePage';
 import './styles/visuart.css';
 
 /** Le pagine personali chiedono l'accesso e poi riportano dove si voleva andare. */
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
             <Route path="/chat/:username" element={<RequireAuth><ChatPage /></RequireAuth>} />
             <Route path="/profilo" element={<RequireAuth><ProfilePage /></RequireAuth>} />
+            <Route path="/utenti/:username" element={<UserProfilePage />} />
             <Route path="/impostazioni" element={<RequireAuth><SettingsPage /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />
             <Route path="/nuova-critica" element={<RequireAuth><NewCritiquePage /></RequireAuth>} />

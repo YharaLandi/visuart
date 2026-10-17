@@ -331,7 +331,7 @@ export default function ChatPage() {
                 </button>
                 <Avatar name={activeName} size="sm" />
                 <div>
-                  <strong>{activeName}</strong>
+                  <strong><Link to={`/utenti/${withParam}`} className="author-link">{activeName}</Link></strong>
                   <small className={active?.online ? 'on' : ''}>
                     {active?.online ? 'Online' : 'Non in linea'}{active?.counterpartRole ? ` · ${ROLE_LABEL[active.counterpartRole]}` : ''}
                   </small>

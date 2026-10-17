@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { artOf, filmOf, n, serial, splitNote } from '../lib/format';
 import { Motif, PaletteBars, TitlePair } from './ui/Visual';
 
@@ -6,6 +6,12 @@ import { Motif, PaletteBars, TitlePair } from './ui/Visual';
 export default function ConnectionCard({ conn, selected = false }) {
   const film = filmOf(conn);
   const art = artOf(conn);
+  const navigate = useNavigate();
+  const openAuthor = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/utenti/${conn.authorUsername}`);
+  };
   return (
     <Link to={`/connessioni/${conn.id}`} className={`card conn-card ${selected ? 'conn-card--selected' : ''}`}>
       <p className="conn-card__num">{conn.category.toUpperCase()}&nbsp; / &nbsp;{serial(conn.id)}</p>
@@ -17,7 +23,11 @@ export default function ConnectionCard({ conn, selected = false }) {
       <PaletteBars palette={film.palette} label="Film" tone="film" />
       <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" />
       <p className="conn-card__quote">«{splitNote(conn.criticalNote).quote}»</p>
-      <p className="conn-card__author">{conn.authorName ?? 'Archivio VisuArt'} · Interpretazione personale</p>
+      <p className="conn-card__author">
+        {conn.authorUsername
+          ? <span role="link" tabIndex={0} className="author-link" onClick={openAuthor} onKeyDown={(e) => e.key === 'Enter' && openAuthor(e)}>{conn.authorName}</span>
+          : 'Archivio VisuArt'} · Interpretazione personale
+      </p>
       <p className="conn-card__stats">
         {n(conn.likeCount)} mi piace &nbsp;·&nbsp; {n(conn.commentCount)} commenti &nbsp;·&nbsp; {n(conn.viewCount)} viste
       </p>

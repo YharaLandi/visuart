@@ -84,6 +84,22 @@ class ChatExtrasIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void publicProfileIsReadableByAnyoneWithoutEmail() throws Exception {
+        JsonNode user = register(unique("pubblica"));
+        String username = user.get("username").asText();
+
+        String body = mvc.perform(get("/api/users/" + username + "/profile"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value(username))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andExpect(jsonPath("$.connections").value(0))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(body).doesNotContain("@test.local");
+
+        mvc.perform(get("/api/users/nessuno-" + unique("") + "/profile")).andExpect(status().isNotFound());
+    }
+
+    @Test
     void historyIsPagedBackwards() throws Exception {
         JsonNode alice = register(unique("alice"));
         JsonNode bob = register(unique("bob"));

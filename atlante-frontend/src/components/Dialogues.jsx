@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { comments as commentsApi } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { n, timeAgo } from '../lib/format';
@@ -77,7 +77,7 @@ export default function Dialogues({ connectionId, onCountChange }) {
           <Avatar name={c.authorName} size="sm" />
           <div style={{ flex: 1 }}>
             <p className="comment__meta">
-              <strong>{c.authorName}</strong> <span>· {timeAgo(c.createdAt)}{c.editedAt ? ' · modificato' : ''}</span>
+              <strong>{c.authorUsername ? <Link to={`/utenti/${c.authorUsername}`} className="author-link">{c.authorName}</Link> : c.authorName}</strong> <span>· {timeAgo(c.createdAt)}{c.editedAt ? ' · modificato' : ''}</span>
             </p>
             {editing?.id === c.id ? (
               <form onSubmit={saveEdit} style={{ marginTop: 8 }}>

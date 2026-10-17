@@ -116,6 +116,7 @@ export const account = {
 
 export const users = {
   search: (q) => api.get(`/api/users/search?q=${encodeURIComponent(q)}`),
+  profile: (username) => api.get(`/api/users/${encodeURIComponent(username)}/profile`),
 };
 
 export const notifications = {

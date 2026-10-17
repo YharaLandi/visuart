@@ -46,6 +46,12 @@ public final class Dtos {
     public record UserSummary(String username, String displayName) {
     }
 
+    /** Profilo visibile a tutti: niente email. */
+    public record PublicProfile(String username, String displayName, String role, String bio,
+                                java.time.Instant createdAt, long connections, long likesReceived,
+                                long comments) {
+    }
+
     public record UpdateProfileRequest(@NotBlank @Size(max = 120) String displayName,
                                        @Size(max = 300) String bio) {
     }
