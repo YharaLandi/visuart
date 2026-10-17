@@ -5,14 +5,17 @@ import { currentToken, wsUrl } from './client';
  * Sessione "di sfondo" sempre attiva da loggati: notifiche di like e commenti e
  * avviso di attività in chat (per aggiornare il badge dei non letti in ogni pagina).
  */
-export function connectNotifications(onNotification, onChatActivity) {
+export function connectNotifications(onNotification, onChatActivity, onMessage) {
   const client = new Client({
     brokerURL: wsUrl(),
     connectHeaders: { Authorization: `Bearer ${currentToken()}` },
     reconnectDelay: 5000,
     onConnect: () => {
       client.subscribe('/user/queue/notifications', (f) => onNotification(JSON.parse(f.body)));
-      client.subscribe('/user/queue/messages', () => onChatActivity?.());
+      client.subscribe('/user/queue/messages', (f) => {
+        onChatActivity?.();
+        onMessage?.(JSON.parse(f.body));
+      });
       client.subscribe('/user/queue/updates', (f) => {
         if (JSON.parse(f.body).type === 'READ') onChatActivity?.();
       });

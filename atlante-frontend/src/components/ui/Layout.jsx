@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { notifications as notificationsApi } from '../../api/client';
+import { notifications as notificationsApi, users as usersApi } from '../../api/client';
 import { connectNotifications } from '../../api/stomp';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
@@ -63,10 +63,49 @@ function describe(n) {
 }
 
 /** Notifiche di like e commenti; la stessa sessione WebSocket aggiorna il badge della chat. */
+// nomi visualizzati di chi scrive, per non chiederli a ogni messaggio
+const nameCache = new Map();
+function displayNameOf(username) {
+  if (!nameCache.has(username)) {
+    nameCache.set(username, usersApi.profile(username).then((p) => p.displayName).catch(() => username));
+  }
+  return nameCache.get(username);
+}
+
+const TOAST_MS = 6000;
+
+/** Avvisi a comparsa per i messaggi in arrivo; cliccando si apre la conversazione. */
+function MessageToasts({ toasts, onOpen, onClose }) {
+  if (toasts.length === 0) return null;
+  return (
+    <div className="toasts" role="status" aria-live="polite">
+      {toasts.map((t) => (
+        <div key={t.id} className="toast">
+          <button className="toast__body" onClick={() => onOpen(t)}>
+            <span className="toast__icon"><Icon name="chat" /></span>
+            <span>
+              <strong>Nuovo messaggio da {t.name}</strong>
+              <small>{t.text || 'Ti ha condiviso una connessione'}</small>
+            </span>
+          </button>
+          <button className="toast__close" onClick={() => onClose(t.id)} aria-label="Chiudi avviso"><Icon name="close" /></button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Bell() {
   const { refreshChatUnread } = useApp();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [items, setItems] = useState([]);
+  const [toasts, setToasts] = useState([]);
+  const pathRef = useRef(location.pathname);
+  pathRef.current = location.pathname;
+  const meRef = useRef(user?.username);
+  meRef.current = user?.username;
   const [open, setOpen] = useState(false);
   const ref = useClickOutside(open, setOpen);
   const refreshRef = useRef(refreshChatUnread);
@@ -76,9 +115,24 @@ function Bell() {
     notificationsApi.list().then(setItems).catch(() => {});
     return connectNotifications(
       (n) => setItems((prev) => [n, ...prev].slice(0, 30)),
-      () => refreshRef.current?.()
+      () => refreshRef.current?.(),
+      (m) => {
+        // solo i messaggi ricevuti, e non se quella conversazione è già aperta
+        if (m.recipient !== meRef.current || pathRef.current === `/chat/${m.sender}`) return;
+        displayNameOf(m.sender).then((name) => {
+          const toast = { id: m.id, sender: m.sender, name, text: m.text };
+          setToasts((prev) => [...prev.filter((t) => t.sender !== m.sender), toast].slice(-3));
+          setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== toast.id)), TOAST_MS);
+        });
+      }
     );
   }, []);
+
+  const openToast = (t) => {
+    setToasts((prev) => prev.filter((x) => x.sender !== t.sender));
+    navigate(`/chat/${t.sender}`);
+  };
+  const closeToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
 
   const unread = items.filter((n) => !n.read).length;
   const toggle = () => {
@@ -92,6 +146,7 @@ function Bell() {
 
   return (
     <div className="menu-wrap" ref={ref}>
+      <MessageToasts toasts={toasts} onOpen={openToast} onClose={closeToast} />
       <button className="icon-btn bell" onClick={toggle} aria-label="Notifiche">
         <Icon name="bell" />
         {unread > 0 && <span className="bell__count">{unread > 9 ? '9+' : unread}</span>}
@@ -124,7 +179,7 @@ export function NavBar({ minimal = false }) {
   const next = encodeURIComponent(location.pathname + location.search);
 
   return (
-    <header className="nav">
+    <header className={`nav ${minimal ? 'nav--minimal' : ''}`}>
       <div className="container nav__inner">
         <Brand />
         {!minimal && (
@@ -143,7 +198,8 @@ export function NavBar({ minimal = false }) {
               <Icon name="search" />
             </button>
           )}
-          {!minimal && user && <span className="nav__bell-desktop"><Bell /></span>}
+          {/* sempre attiva da loggati: porta anche gli avvisi dei messaggi; il pulsante si nasconde via CSS */}
+          {user && <Bell />}
           {!minimal && (
             <Link to="/nuova-critica" className="btn btn--primary nav__cta">
               <Icon name="plus" /> Nuova critica
