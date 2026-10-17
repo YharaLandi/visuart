@@ -1,0 +1,16 @@
+app:
+  seed:
+    enabled: false
+  # i test non devono mai spedire mail vere, anche se secrets.yml contiene la password
+  mail:
+    enabled: false
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:atlante-test;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
