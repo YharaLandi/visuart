@@ -1,0 +1,53 @@
+# Blueprint Render: database PostgreSQL, backend Docker e frontend statico.
+# Su Render: New > Blueprint, scegli il repository; i valori "sync: false" li inserisci tu dalla dashboard.
+databases:
+  - name: atlante-db
+    plan: free
+    databaseName: atlante
+    user: atlante
+
+services:
+  - type: web
+    name: atlante-backend
+    runtime: docker
+    plan: free
+    rootDir: atlante-backend
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: atlante-db
+          property: connectionString
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SEED_DEMO
+        value: "true"
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false   # es. https://atlante-frontend.onrender.com
+      - key: FRONTEND_URL
+        sync: false   # stesso indirizzo: serve ai link delle mail
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+
+  - type: web
+    name: atlante-frontend
+    runtime: static
+    rootDir: atlante-frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    # le pagine (/connessioni/42, /chat, ...) sono gestite dal router React
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false   # es. https://atlante-backend.onrender.com
