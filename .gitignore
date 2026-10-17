@@ -1,0 +1,17 @@
+# ambiente locale
+.claude/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# segreti e dati locali
+secrets.yml
+.env.local
+atlante-backend/data/
+
+# build
+target/
+node_modules/
+dist/
+*.log
