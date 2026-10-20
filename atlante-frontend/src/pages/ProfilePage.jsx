@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { account as accountApi } from '../api/client';
+import { account as accountApi, connections as connectionsApi } from '../api/client';
+import ConnectionCard from '../components/ConnectionCard';
 import Icon from '../components/ui/Icon';
 import Layout from '../components/ui/Layout';
 import { Avatar } from '../components/ui/Visual';
@@ -11,10 +12,13 @@ export default function ProfilePage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [mine, setMine] = useState([]);
 
   useEffect(() => {
     accountApi.stats().then(setStats).catch(() => setStats(null));
-  }, []);
+    connectionsApi.search({ author: user.username, sort: 'recent', size: 50 })
+      .then((p) => setMine(p.content)).catch(() => setMine([]));
+  }, [user.username]);
 
   return (
     <Layout>
@@ -67,6 +71,29 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        <div className="results-head" style={{ marginTop: 56 }}>
+          <h2>Le mie critiche</h2>
+          <span>{n(mine.length)} PUBBLICATE</span>
+        </div>
+        {mine.length === 0 ? (
+          <div className="state">
+            <h3>Non hai ancora pubblicato critiche.</h3>
+            <p>Accosta due opere e racconta perché si parlano.</p>
+            <Link to="/nuova-critica" className="btn btn--primary btn--sm"><Icon name="plus" /> Nuova critica</Link>
+          </div>
+        ) : (
+          <div className="cards-3">
+            {mine.map((c) => (
+              <div key={c.id} className="my-critique">
+                <ConnectionCard conn={c} />
+                <div className="my-critique__actions">
+                  <Link to={`/connessioni/${c.id}/modifica`} className="link"><Icon name="pencil" /> Modifica</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

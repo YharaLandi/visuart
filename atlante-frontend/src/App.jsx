@@ -53,6 +53,7 @@ export default function App() {
             <Route path="/impostazioni" element={<RequireAuth><SettingsPage /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />
             <Route path="/nuova-critica" element={<RequireAuth><NewCritiquePage /></RequireAuth>} />
+            <Route path="/connessioni/:id/modifica" element={<RequireAuth><NewCritiquePage /></RequireAuth>} />
             <Route path="/accedi" element={<LoginPage />} />
             <Route path="/registrati" element={<RegisterPage />} />
             <Route path="/recupero-password" element={<ForgotPasswordPage />} />

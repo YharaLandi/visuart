@@ -36,6 +36,7 @@ const BI = {
   shield: 'shield-lock',
   envelope: 'envelope',
   trash: 'trash3',
+  pencil: 'pencil',
   people: 'people',
   dot: 'circle-fill',
   circle: 'circle',

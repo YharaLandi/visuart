@@ -671,3 +671,13 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 860px) { .toasts { right: 16px; bottom: 150px; } }
 
 .nav--minimal .bell { display: none; }
+
+/* ---- azioni dell'autrice sulla critica ---- */
+.detail-owner { display: flex; gap: 22px; align-items: center; margin-top: 14px; }
+.detail-owner .bi { margin-right: 4px; }
+.field input:disabled { color: var(--text-2); cursor: default; }
+
+.my-critique { display: flex; flex-direction: column; }
+.my-critique .conn-card { flex: 1; }
+.my-critique__actions { padding: 10px 6px 0; }
+.my-critique__actions .bi { margin-right: 4px; }

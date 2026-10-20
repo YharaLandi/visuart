@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { connections as connectionsApi, works as worksApi } from '../api/client';
 import CategoryChips from '../components/CategoryChips';
 import Icon from '../components/ui/Icon';
@@ -9,7 +9,7 @@ import { Motif } from '../components/ui/Visual';
 const MAX = 3000;
 
 /** Select con ricerca: "Cerca e seleziona un Film / un'Opera". */
-function WorkCombo({ label, works, value, onChange }) {
+function WorkCombo({ label, works, value, onChange, disabled = false }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const ref = useRef(null);
@@ -36,6 +36,7 @@ function WorkCombo({ label, works, value, onChange }) {
           aria-expanded={open}
           value={open ? q : selected ? `${selected.title}${selected.year ? ` · ${selected.year}` : ''}` : ''}
           placeholder="Scrivi per cercare…"
+          disabled={disabled}
           onFocus={() => { setOpen(true); setQ(''); }}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -57,6 +58,9 @@ function WorkCombo({ label, works, value, onChange }) {
 
 export default function NewCritiquePage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const editing = Boolean(id);
+  const [loaded, setLoaded] = useState(!editing);
   const [films, setFilms] = useState([]);
   const [arts, setArts] = useState([]);
   const [filmId, setFilmId] = useState(null);
@@ -72,6 +76,22 @@ export default function NewCritiquePage() {
     worksApi.list({ type: 'ARTWORK' }).then(setArts).catch(() => {});
   }, []);
 
+  // in modifica le due opere restano quelle della critica: si cambiano categoria e testo
+  useEffect(() => {
+    if (!editing) return;
+    connectionsApi.get(id)
+      .then((c) => {
+        const film = c.source.type === 'FILM' ? c.source : c.target;
+        const art = c.source.type === 'ARTWORK' ? c.source : c.target;
+        setFilmId(film.id);
+        setArtId(art.id);
+        setCategory(c.categorySlug);
+        setNote(c.criticalNote);
+        setLoaded(true);
+      })
+      .catch((e) => setError(e.message));
+  }, [editing, id]);
+
   const film = films.find((w) => w.id === filmId);
   const art = arts.find((w) => w.id === artId);
 
@@ -84,10 +104,9 @@ export default function NewCritiquePage() {
     setBusy(true);
     setError(null);
     try {
-      const created = await connectionsApi.create({
-        sourceWorkId: film.id, targetWorkId: art.id, categorySlug: category, criticalNote: note.trim(),
-      });
-      navigate(`/connessioni/${created.id}`);
+      const body = { sourceWorkId: film.id, targetWorkId: art.id, categorySlug: category, criticalNote: note.trim() };
+      const saved = editing ? await connectionsApi.update(id, body) : await connectionsApi.create(body);
+      navigate(`/connessioni/${saved.id}`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -96,14 +115,26 @@ export default function NewCritiquePage() {
     return undefined;
   };
 
+  const remove = async () => {
+    if (!window.confirm('Eliminare questa critica? Spariscono anche i suoi mi piace e commenti.')) return;
+    setBusy(true);
+    try {
+      await connectionsApi.remove(id);
+      navigate('/profilo');
+    } catch (err) {
+      setError(err.message);
+      setBusy(false);
+    }
+  };
+
   return (
     <Shell rightText="L’archivio delle connessioni" caption="La connessione sarà pubblica. Puoi modificarla dal tuo profilo.">
       <form className="dialog dialog--wide critique" onSubmit={submit}>
         <div className="dialog__top">
-          <span className="eyebrow eyebrow--light">Un nuovo sguardo</span>
+          <span className="eyebrow eyebrow--light">{editing ? 'Rivedi il tuo sguardo' : 'Un nuovo sguardo'}</span>
           <button type="button" className="dialog__close" onClick={() => navigate(-1)} aria-label="Chiudi"><Icon name="close" /></button>
         </div>
-        <h1 style={{ marginTop: 34 }}>Nuova critica</h1>
+        <h1 style={{ marginTop: 34 }}>{editing ? 'Modifica critica' : 'Nuova critica'}</h1>
         <p className="dialog__intro">
           Accosta due opere e racconta la tua interpretazione. Non serve dimostrare un’influenza: serve uno sguardo.
         </p>
@@ -111,12 +142,12 @@ export default function NewCritiquePage() {
         <div className="critique__cols">
           <div>
             <span className="tag tag--film">Film</span>
-            <WorkCombo label="Cerca e seleziona un Film" works={films} value={filmId} onChange={setFilmId} />
+            <WorkCombo label="Cerca e seleziona un Film" works={films} value={filmId} onChange={setFilmId} disabled={editing} />
             {film && <p className="critique__sub">{film.creator} · Cinema</p>}
           </div>
           <div>
             <span className="tag tag--art">Opera d’arte</span>
-            <WorkCombo label="Cerca e seleziona un’Opera" works={arts} value={artId} onChange={setArtId} />
+            <WorkCombo label="Cerca e seleziona un’Opera" works={arts} value={artId} onChange={setArtId} disabled={editing} />
             {art && <p className="critique__sub">{art.creator} · Pittura</p>}
           </div>
         </div>
@@ -139,7 +170,16 @@ export default function NewCritiquePage() {
         </label>
         {error && <p className="form-error" style={{ marginTop: 16 }}>{error}</p>}
         <div>
-          <button className="btn btn--primary" disabled={busy}><Icon name="arrowUpRight" /> {busy ? 'Pubblico…' : 'Pubblica la connessione'}</button>
+          <div className="settings__row" style={{ marginTop: 26, justifyContent: 'space-between' }}>
+            <button className="btn btn--primary" style={{ marginTop: 0 }} disabled={busy || !loaded}>
+              <Icon name="arrowUpRight" /> {busy ? 'Salvo…' : editing ? 'Salva le modifiche' : 'Pubblica la connessione'}
+            </button>
+            {editing && (
+              <button type="button" className="btn btn--ghost btn--sm btn--danger" onClick={remove} disabled={busy}>
+                <Icon name="trash" /> Elimina la critica
+              </button>
+            )}
+          </div>
         </div>
       </form>
     </Shell>

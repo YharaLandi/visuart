@@ -127,6 +127,11 @@ export default function ConnectionDetailPage() {
   const author = conn.authorName ?? 'Archivio VisuArt';
   const periods = [decade(art.year), decade(film.year)].filter(Boolean).join(' / ');
   const isMine = user && conn.authorUsername === user.username;
+  const removeConnection = async () => {
+    if (!window.confirm('Eliminare questa critica? Spariscono anche i suoi mi piace e commenti.')) return;
+    await connectionsApi.remove(conn.id);
+    navigate('/connessioni');
+  };
 
   return (
     <Layout>
@@ -148,6 +153,12 @@ export default function ConnectionDetailPage() {
             </button>
           </div>
           <p className="detail-meta">{n(conn.viewCount)} visualizzazioni · {readingMinutes(conn.criticalNote)} min di lettura</p>
+          {(isMine || user?.role === 'ADMIN') && (
+            <div className="detail-owner">
+              <Link to={`/connessioni/${conn.id}/modifica`} className="link"><Icon name="pencil" /> {isMine ? 'Modifica la tua critica' : 'Modifica (admin)'}</Link>
+              <button className="link-muted" onClick={removeConnection}><Icon name="trash" /> Elimina</button>
+            </div>
+          )}
         </header>
 
         <div className="detail-frames">

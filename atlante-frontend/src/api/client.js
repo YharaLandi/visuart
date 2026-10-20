@@ -94,6 +94,8 @@ export const connections = {
   },
   get: (id) => api.get(`/api/connections/${id}`),
   create: (data) => api.post('/api/connections', data),
+  update: (id, data) => api.put(`/api/connections/${id}`, data),
+  remove: (id) => api.delete(`/api/connections/${id}`),
   registerView: (id) => api.post(`/api/connections/${id}/view`),
   search: (params = {}) => {
     const qs = new URLSearchParams();
