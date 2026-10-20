@@ -49,5 +49,7 @@ services:
         source: /*
         destination: /index.html
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: VITE_API_BASE_URL
         sync: false   # es. https://atlante-backend.onrender.com
