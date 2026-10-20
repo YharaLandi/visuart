@@ -73,7 +73,7 @@ public class MailService {
             log.warn("Invio mail disattivato (MAIL_PASSWORD vuota): report statistiche per {} non spedito", to);
             return;
         }
-        send(to, "Il tuo riepilogo sull'Atlante", html);
+        send(to, "Il tuo riepilogo su VisuArt", html);
     }
 
     public void sendPasswordReset(String to, String displayName, String link, long minutes) {
@@ -84,7 +84,7 @@ public class MailService {
         String name = HtmlUtils.htmlEscape(displayName != null ? displayName : "");
         String html = """
                 <div style="font-family:sans-serif;max-width:520px">
-                  <h2>Atlante delle Influenze</h2>
+                  <h2>VisuArt</h2>
                   <p>Ciao %s,</p>
                   <p>abbiamo ricevuto una richiesta di reimpostazione della password.</p>
                   <p><a href="%s" style="background:#55e0d2;color:#000;padding:10px 18px;

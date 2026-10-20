@@ -21,7 +21,7 @@ public class OpenApiConfig {
     public OpenAPI atlanteOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Atlante delle Influenze — API")
+                        .title("VisuArt — API")
                         .version("1.0")
                         .description("""
                                 Connessioni critiche tra cinema e arte visiva: opere, connessioni, \

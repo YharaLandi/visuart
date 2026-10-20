@@ -25,7 +25,7 @@ app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
   mail:
     enabled: ${MAIL_ENABLED:true}
-    from: ${MAIL_FROM:Atlante delle Influenze <comunication.visuart@gmail.com>}
+    from: ${MAIL_FROM:VisuArt <comunication.visuart@gmail.com>}
   password-reset:
     expiration-minutes: 30
   seed:

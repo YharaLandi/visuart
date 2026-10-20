@@ -133,7 +133,7 @@ public class ImportService {
             Path target = storageDir.resolve(baseName + ext);
             var connection = URI.create(url).toURL().openConnection();
             connection.setRequestProperty("User-Agent",
-                    "AtlanteDelleInfluenze/1.0 (progetto didattico Epicode)");
+                    "VisuArt/1.0 (progetto didattico Epicode)");
             connection.setConnectTimeout(10_000);
             connection.setReadTimeout(20_000);
             try (InputStream in = connection.getInputStream()) {

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Il tuo Atlante</title>
+    <title>Il tuo VisuArt</title>
 </head>
 <body style="margin:0;background:#0b0d10;font-family:Arial,sans-serif;color:#e2e2e6">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 12px">
@@ -12,7 +12,7 @@
                    style="background:#171b21;border:1px solid #232830;border-radius:12px;padding:28px">
                 <tr>
                     <td>
-                        <h1 style="margin:0 0 4px;font-family:Georgia,serif;font-size:24px">Atlante delle Influenze</h1>
+                        <h1 style="margin:0 0 4px;font-family:Georgia,serif;font-size:24px;font-style:italic">VisuArt</h1>
                         <p style="margin:0 0 24px;color:#bbcac6">
                             Ciao <span th:text="${name}">utente</span>, ecco il tuo riepilogo
                             al <span th:text="${date}">01/01/2026</span>.
@@ -26,7 +26,7 @@
                         </table>
                         <p style="margin:24px 0 0">
                             <a th:href="${link}" style="background:#55e0d2;color:#000;padding:10px 18px;
-                               border-radius:999px;text-decoration:none">Apri l'Atlante</a>
+                               border-radius:999px;text-decoration:none">Apri VisuArt</a>
                         </p>
                     </td>
                 </tr>

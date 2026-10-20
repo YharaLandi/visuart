@@ -105,7 +105,7 @@ class PermissionsIntegrationTest extends AbstractIntegrationTest {
     @Test
     void apiDocsArePublicAndTestsNeverSendRealMail() throws Exception {
         mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.info.title").value("Atlante delle Influenze — API"));
+                .andExpect(jsonPath("$.info.title").value("VisuArt — API"));
         mvc.perform(get("/swagger-ui/index.html")).andExpect(status().isOk());
         assertThat(mailService.isEnabled()).isFalse();
     }
