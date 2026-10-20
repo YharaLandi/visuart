@@ -30,9 +30,6 @@ public class AicClient {
                 return results;
             }
             for (JsonNode n : root.get("data")) {
-                if (!n.hasNonNull("image_id")) {
-                    continue;
-                }
                 String artist = n.path("artist_display").asText(null);
                 if (artist != null && artist.contains("\n")) {
                     artist = artist.substring(0, artist.indexOf('\n'));
@@ -42,8 +39,7 @@ public class AicClient {
                         n.path("title").asText(),
                         artist,
                         n.hasNonNull("date_end") ? n.get("date_end").asInt() : null,
-                        "https://www.artic.edu/iiif/2/" + n.get("image_id").asText()
-                                + "/full/600,/0/default.jpg",
+                        null, // immagine IIIF bloccata fuori da artic.edu: la scheda mostra il segnaposto
                         "AIC"));
             }
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.atlante.bootstrap;
 
-import com.atlante.client.AicClient;
+import com.atlante.client.WikipediaClient;
 import com.atlante.client.MetMuseumClient;
 import com.atlante.client.TmdbClient;
 import com.atlante.model.*;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 // Dati demo al primo avvio (database vuoto). In produzione: SEED_DEMO=true e ADMIN_PASSWORD impostata.
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
+@org.springframework.core.annotation.Order(0)
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository users;
@@ -27,7 +28,7 @@ public class DataSeeder implements CommandLineRunner {
     private final PasswordEncoder encoder;
     private final TmdbClient tmdb;
     private final MetMuseumClient met;
-    private final AicClient aic;
+    private final WikipediaClient wikipedia;
     private final ImportService importService;
 
     @Value("${app.seed.password}")
@@ -36,7 +37,7 @@ public class DataSeeder implements CommandLineRunner {
     public DataSeeder(UserRepository users, CategoryRepository categories,
                       WorkRepository works, ConnectionRepository connections,
                       PasswordEncoder encoder, TmdbClient tmdb, MetMuseumClient met,
-                      AicClient aic, ImportService importService) {
+                      WikipediaClient wikipedia, ImportService importService) {
         this.users = users;
         this.categories = categories;
         this.works = works;
@@ -44,7 +45,7 @@ public class DataSeeder implements CommandLineRunner {
         this.encoder = encoder;
         this.tmdb = tmdb;
         this.met = met;
-        this.aic = aic;
+        this.wikipedia = wikipedia;
         this.importService = importService;
     }
 
@@ -224,7 +225,7 @@ public class DataSeeder implements CommandLineRunner {
                     url = artworkUrls.get(w.getTitle());
                     if (url == null) {
                         String query = englishTitles.getOrDefault(w.getTitle(), w.getTitle());
-                        url = aic.findImageUrl(query, w.getCreator())
+                        url = wikipedia.findImageUrl(query, w.getCreator())
                                 .orElseGet(() -> met.search(query).stream().findFirst()
                                         .map(r -> r.imageUrl()).orElse(null));
                     }

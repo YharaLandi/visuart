@@ -34,15 +34,17 @@ public class AiDiscoveryService {
     private final TmdbClient tmdb;
     private final MetMuseumClient met;
     private final AicClient aic;
+    private final com.atlante.client.WikipediaClient wikipedia;
     private final LlmService llm;
     private final ObjectMapper mapper = new ObjectMapper();
     private final Map<String, AiDiscoveryResponse> cache = new ConcurrentHashMap<>();
 
     public AiDiscoveryService(TmdbClient tmdb, MetMuseumClient met,
-                              AicClient aic, LlmService llm) {
+                              AicClient aic, com.atlante.client.WikipediaClient wikipedia, LlmService llm) {
         this.tmdb = tmdb;
         this.met = met;
         this.aic = aic;
+        this.wikipedia = wikipedia;
         this.llm = llm;
     }
 
@@ -82,7 +84,7 @@ public class AiDiscoveryService {
 
         List<AiSuggestion> suggestions = parseSuggestions(llm.generate(prompt));
         suggestions = suggestions.stream()
-                .map(s -> withImage(s, aic.findImageUrl(s.title(), s.creator()).orElse(null)))
+                .map(s -> withImage(s, wikipedia.findImageUrl(s.title(), s.creator()).orElse(null)))
                 .toList();
 
         return new AiDiscoveryResponse(film.title(), film.creator(), film.year(),
@@ -95,7 +97,7 @@ public class AiDiscoveryService {
         String creator = art != null ? art.creator() : null;
         Integer year = art != null ? art.year() : null;
         String imageUrl = art != null ? art.imageUrl()
-                : aic.findImageUrl(query, null).orElse(null);
+                : wikipedia.findImageUrl(query, null).orElse(null);
         String palette = paletteFromUrl(imageUrl);
 
         String prompt = """
@@ -169,7 +171,7 @@ public class AiDiscoveryService {
             tmp = Files.createTempFile("atlante-discover", ".img");
             var conn = URI.create(url).toURL().openConnection();
             conn.setRequestProperty("User-Agent",
-                    "AtlanteDelleInfluenze/1.0 (progetto didattico Epicode)");
+                    "VisuArt/1.0 (progetto didattico Epicode)");
             conn.setConnectTimeout(10_000);
             conn.setReadTimeout(20_000);
             try (InputStream in = conn.getInputStream()) {
