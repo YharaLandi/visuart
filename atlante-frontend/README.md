@@ -1,43 +1,62 @@
-# Atlante delle influenze — frontend
+# VisuArt — frontend
 
-Interfaccia React del grafo interattivo. Richiede il backend Spring Boot già
-avviato su `http://localhost:8080` (vedi `atlante-backend/README.md`).
+Interfaccia React di VisuArt, l'archivio di relazioni tra cinema e arti visive.
 
 ## Avvio
 
 ```bash
+cp .env.example .env     # VITE_API_BASE_URL=http://localhost:8080
 npm install
-npm run dev
+npm run dev              # http://localhost:5173
 ```
 
-Apre su `http://localhost:5173`. Il file `.env` punta già al backend locale
-(`VITE_API_BASE_URL=http://localhost:8080`) — non serve toccarlo in sviluppo.
+Il backend deve essere attivo (vedi `../atlante-backend/README.md`).
 
-## Cosa vedrai
-
-Il grafo carica automaticamente le 8 opere e 5 connessioni del seed demo.
-Clicca su un'etichetta di connessione (sulla linea tra due nodi) per aprire il
-pannello a destra con la nota critica. I chip in alto filtrano per categoria.
+| Comando | Cosa fa |
+|---|---|
+| `npm run dev` | server di sviluppo con aggiornamento automatico |
+| `npm run build` | build di produzione in `dist/` |
+| `npm run preview` | anteprima della build |
+| `npm run lint` | controllo del codice con oxlint |
 
 ## Struttura
 
 ```
 src/
-  api/client.js         chiamate REST verso il backend, gestione token JWT
-  context/AuthContext   stato di login (non ancora usato in UI, pronto per estensioni)
-  components/
-    GraphView           canvas React Flow, fetch di /api/graph
-    WorkNode             nodo custom (cerchio colorato per film/opera d'arte)
-    DetailPanel          pannello nota critica
-    CategoryFilter        chip di filtro categoria
-    NavBar               intestazione
-  pages/AtlasPage        composizione della pagina principale
-  lib/layout.js          layout circolare dei nodi (nessuna libreria esterna)
-  styles/global.css      palette navy/teal/oro, Manrope + Source Serif 4
+  api/          client REST (client.js) e WebSocket STOMP (stomp.js)
+  context/      sessione (AuthContext) e stato condiviso: preferiti, messaggi non letti (AppContext)
+  components/   card, lettura AI, dialoghi, scheda opera, ...
+    ui/         design system: layout e navigazione, icone, motivo dei due cerchi, stati di servizio
+  pages/        una pagina per rotta
+  lib/          formattazioni (numeri, date, ruoli)
+  styles/       visuart.css: token e stili di tutta l'app
 ```
 
-## Prossimi passi naturali
+## Rotte
 
-- Form di login/registrazione collegato ad `AuthContext` (già pronto lato client)
-- Form di creazione connessione (CRUD lato UI, oggi solo lettura)
-- Ricerca e import da TMDB/Met Museum direttamente dall'interfaccia
+| Rotta | Pagina | Accesso |
+|---|---|---|
+| `/` | Home | tutti |
+| `/connessioni` · `/connessioni/:id` | Più viste · dettaglio | tutti |
+| `/grafo` | Atlante delle affinità | tutti |
+| `/cerca` | Ricerca negli archivi e scheda opera | tutti |
+| `/utenti/:username` | Profilo pubblico | tutti |
+| `/collezione` | La mia collezione | login |
+| `/chat` · `/chat/:username` | Conversazioni | login |
+| `/profilo` · `/impostazioni` | Profilo e impostazioni | login |
+| `/nuova-critica` · `/connessioni/:id/modifica` | Scrivere o modificare una critica | login |
+| `/admin` | Gestione utenti | admin |
+| `/accedi` · `/registrati` · `/recupero-password` · `/reimposta-password` | Accesso | tutti |
+
+## Design
+
+Tema scuro da galleria: teal `#55e0d2` per il cinema, ambra `#f7b24d` per l'arte, rosa
+solo per i preferiti. Titoli in Source Serif 4, testo in Manrope, icone Bootstrap Icons.
+I token sono all'inizio di `src/styles/visuart.css`. Layout responsive: sotto gli 860 px
+compaiono la barra di navigazione in basso e il pulsante "Nuova critica".
+
+## Tempo reale
+
+Da loggati resta aperta una sessione STOMP su `/ws` (JWT nel frame CONNECT): aggiorna
+notifiche, numero di messaggi non letti e mostra un avviso quando arriva un messaggio.
+La pagina chat apre una seconda sessione per invio, conferme di lettura e "sta scrivendo".
