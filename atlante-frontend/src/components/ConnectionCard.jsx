@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { artOf, filmOf, n, serial, splitNote } from '../lib/format';
+import { kindLabel, n, pairOf, serial, splitNote } from '../lib/format';
 import { imgUrl } from '../api/client';
 import { PaletteBars, TitlePair } from './ui/Visual';
 
 /** Card connessione: categoria e numero, motivo, titoli, due palette, citazione, autore, numeri. */
 export default function ConnectionCard({ conn, selected = false }) {
-  const film = filmOf(conn);
-  const art = artOf(conn);
+  const { a: film, b: art, toneA, toneB } = pairOf(conn);
   const navigate = useNavigate();
   const motifRef = useRef(null);
   const [seen, setSeen] = useState(false);
@@ -35,15 +34,15 @@ export default function ConnectionCard({ conn, selected = false }) {
     <Link to={`/connessioni/${conn.id}`} className={`card conn-card ${selected ? 'conn-card--selected' : ''}`}>
       <p className="conn-card__num">{conn.category.toUpperCase()}&nbsp; / &nbsp;{serial(conn.id)}</p>
       <div ref={motifRef} className={`conn-card__stills ${seen ? 'is-seen' : ''}`} aria-hidden="true">
-        <span className="conn-card__still conn-card__still--film">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
-        <span className="conn-card__still conn-card__still--art">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
+        <span className="conn-card__still">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
+        <span className="conn-card__still conn-card__still--b">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
       </div>
       <TitlePair film={film} art={art} />
       <p className="conn-card__meta">
         {film.year ?? '—'} · {film.creator} / {art.year ?? '—'} · {art.creator}
       </p>
-      <PaletteBars palette={film.palette} label="Film" tone="film" />
-      <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" />
+      <PaletteBars palette={film.palette} label={kindLabel(film)} tone={toneA} />
+      <PaletteBars palette={art.palette} label={kindLabel(art)} tone={toneB} />
       <p className="conn-card__quote">«{splitNote(conn.criticalNote).quote}»</p>
       <p className="conn-card__author">
         {conn.authorUsername

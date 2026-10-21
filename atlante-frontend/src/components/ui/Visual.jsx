@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { avatarUrl, imgUrl } from '../../api/client';
 import Icon from './Icon';
 import { downloadPaletteCard } from '../../lib/paletteCard';
+import { ringStyle, tonesOf } from '../../lib/format';
 
 /** Logo: due cerchi (film teal, opera ambra) e "VisuArt" in serif corsivo. */
 export function Brand({ to = '/', dim = false }) {
@@ -18,8 +19,10 @@ export function Brand({ to = '/', dim = false }) {
 export function Motif({ film, art, size = 'md', filmSrc, artSrc }) {
   const f = filmSrc ?? imgUrl(film?.imageUrl);
   const a = artSrc ?? imgUrl(art?.imageUrl);
+  // gli anelli seguono la tinta delle due opere (anche nelle coppie film–film e opera–opera)
+  const style = film && art ? ringStyle(...tonesOf(film, art)) : undefined;
   return (
-    <span className={`motif motif--${size}`}>
+    <span className={`motif motif--${size}`} style={style}>
       <span className="motif__c">{f && <img src={f} alt={film?.title ?? ''} />}</span>
       <span className="motif__line" />
       <span className="motif__c motif__c--art">{a && <img src={a} alt={art?.title ?? ''} />}</span>
@@ -50,7 +53,7 @@ export function PaletteBars({ palette, label, tone, title, large = false, showHe
 
   return (
     <div>
-      {label && <p className={`palette__label ${tone === 'art' ? 't-art' : 't-film'}`}>{label}</p>}
+      {label && <p className={`palette__label t-${tone ?? 'film'}`}>{label}</p>}
       <div className={`palette ${large ? 'palette--lg' : ''}`}>
         {(colors.length ? colors : Array(6).fill('var(--surface-3)')).map((c, i) => (interactive ? (
           <button key={i} type="button" className="swatch" style={{ background: c }} data-hex={c}
@@ -82,13 +85,18 @@ export function PaletteBars({ palette, label, tone, title, large = false, showHe
   );
 }
 
-/** "In the Mood for Love / [↔] Nighthawks": titolo del film in teal, opera in ambra. */
+/**
+ * "In the Mood for Love / [↔] Nighthawks": prima e seconda opera della coppia.
+ * La tinta segue il tipo (film teal, opera arancio); due opere dello stesso tipo usano la seconda tinta.
+ */
 export function TitlePair({ film, art, as: Tag = 'h3', className = '' }) {
+  const toneA = film?.type === 'ARTWORK' ? 'art' : 'film';
+  const toneB = (art?.type === 'ARTWORK' ? 'art' : 'film') + (film?.type === art?.type ? '2' : '');
   return (
     <Tag className={`title-pair ${className}`}>
-      <span className="title-pair__film">{film?.title}</span>
+      <span className={`title-pair__film t-${toneA}`}>{film?.title}</span>
       <span className="sr-only"> accostato a </span>
-      <span className="title-pair__art"><span className="title-pair__arrow" aria-hidden="true"><Icon name="arrowsLR" /></span>{art?.title}</span>
+      <span className={`title-pair__art t-${toneB}`}><span className="title-pair__arrow" aria-hidden="true"><Icon name="arrowsLR" /></span>{art?.title}</span>
     </Tag>
   );
 }

@@ -3,17 +3,16 @@ import { Link } from 'react-router-dom';
 import { connections as connectionsApi, imgUrl } from '../api/client';
 import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
-import { artOf, filmOf } from '../lib/format';
+import { kindLabel, pairOf } from '../lib/format';
 import Marquee from '../components/Marquee';
 
-/** Le due bacheche sotto l'insegna: il fotogramma e il dipinto dietro il vetro. */
+/** Le due bacheche sotto l'insegna: le due opere della coppia dietro il vetro. */
 function Showcase({ conn }) {
   if (!conn) return <div className="mq-cases mq-cases--empty" aria-hidden="true"><span /><span /></div>;
-  const film = filmOf(conn);
-  const art = artOf(conn);
+  const { a: film, b: art, toneA, toneB } = pairOf(conn);
   const caseFor = (work, tone, kind) => (
     <figure className={`mq-case mq-case--${tone}`}>
-      <span className="mq-case__glass">{imgUrl(work.imageUrl) && <img src={imgUrl(work.imageUrl)} alt={work.title} />}</span>
+      <span className={'mq-case__glass' + (work.type === 'ARTWORK' ? ' frame--art' : ' frame--film')}>{imgUrl(work.imageUrl) && <img src={imgUrl(work.imageUrl)} alt={work.title} />}</span>
       <figcaption>
         <b>{kind}</b> {work.creator}{work.year ? `, ${work.year}` : ''}
       </figcaption>
@@ -21,28 +20,27 @@ function Showcase({ conn }) {
   );
   return (
     <Link to={`/connessioni/${conn.id}`} className="mq-cases" aria-label={`Apri la connessione: ${film.title} con ${art.title}`}>
-      {caseFor(film, 'film', 'Film')}
-      {caseFor(art, 'art', 'Opera')}
+      {caseFor(film, toneA, kindLabel(film, true))}
+      {caseFor(art, toneB, kindLabel(art, true))}
       <span className="mq-cases__open">Leggi la critica{conn.authorName ? ` di ${conn.authorName}` : ''} <Icon name="arrowRight" /></span>
     </Link>
   );
 }
 
 function BillRow({ conn, onShow }) {
-  const film = filmOf(conn);
-  const art = artOf(conn);
+  const { a: film, b: art, toneA, toneB } = pairOf(conn);
   return (
     <li>
       <Link to={`/connessioni/${conn.id}`} className="mq-row"
         onMouseEnter={() => onShow(conn)} onFocus={() => onShow(conn)}>
         <span className="mq-row__stills" aria-hidden="true">
-          <span className="mq-row__still mq-row__still--film">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
-          <span className="mq-row__still mq-row__still--art">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
+          <span className="mq-row__still">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
+          <span className="mq-row__still">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
         </span>
         <span className="mq-row__pair">
-          <span className="mq-row__film">{film.title}</span>
+          <span className={'mq-row__film t-' + toneA}>{film.title}</span>
           <span className="mq-row__con"> con </span>
-          <span className="mq-row__art">{art.title}</span>
+          <span className={'mq-row__art t-' + toneB}>{art.title}</span>
         </span>
         <span className="mq-row__meta">{conn.category}{conn.authorName ? ` · ${conn.authorName}` : ''}</span>
         <span className="mq-row__go" aria-hidden="true"><Icon name="arrowRight" /></span>

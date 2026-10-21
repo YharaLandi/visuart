@@ -67,7 +67,7 @@ export default function WorkSheet({ item, type, context, saved, onSave, onRemove
           {context && <span className="tiny">{context}</span>}
         </div>
         <div className="sheet__main">
-          <div className="sheet__img">{src && <img src={src} alt={item.title} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}</div>
+          <div className={'sheet__img' + (isArt ? ' frame--art' : ' frame--film')}>{src && <img src={src} alt={item.title} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}</div>
           <div>
             <h1>{item.title}</h1>
             <p className={`sheet__by ${isArt ? 't-art' : 't-film'}`}>{item.creator}{item.year ? ` · ${item.year}` : ''}</p>

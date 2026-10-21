@@ -16,12 +16,41 @@ export function serial(id) {
   return `N° ${String(id).padStart(3, '0')}`;
 }
 
-export function filmOf(conn) {
-  return conn.source.type === 'FILM' ? conn.source : conn.target;
+/**
+ * Le due opere di una connessione, in ordine di lettura. Una coppia può essere film–opera,
+ * film–film oppure opera–opera: nelle coppie miste il film viene sempre prima (come in
+ * "film CON dipinto"); nelle coppie dello stesso tipo resta l'ordine scelto da chi scrive.
+ * Ogni opera porta la sua tinta: 'film' / 'art', e 'film2' / 'art2' per la seconda di due
+ * opere dello stesso tipo, così titoli e palette si distinguono anche per colore.
+ */
+export function pairOf(conn) {
+  const { source, target } = conn;
+  const mixed = source.type !== target.type;
+  const [a, b] = mixed && source.type === 'ARTWORK' ? [target, source] : [source, target];
+  const base = (w) => (w.type === 'ARTWORK' ? 'art' : 'film');
+  return {
+    a,
+    b,
+    toneA: base(a),
+    toneB: mixed ? base(b) : `${base(b)}2`,
+    mixed,
+  };
 }
 
+/** Prima opera della coppia (il film, nelle coppie miste). */
+export function filmOf(conn) {
+  return pairOf(conn).a;
+}
+
+/** Seconda opera della coppia (il dipinto, nelle coppie miste). */
 export function artOf(conn) {
-  return conn.source.type === 'ARTWORK' ? conn.source : conn.target;
+  return pairOf(conn).b;
+}
+
+/** Etichetta del tipo di opera, al singolare. */
+export function kindLabel(work, short = false) {
+  if (work?.type === 'ARTWORK') return short ? 'Opera' : 'Opera d’arte';
+  return 'Film';
 }
 
 /** Prima frase come citazione, il resto come paragrafi. */
@@ -94,4 +123,20 @@ export function monthYear(iso) {
 export function sourceLabel(work) {
   const map = { TMDB: 'The Movie Database', MET: 'The Metropolitan Museum of Art', AIC: 'Art Institute of Chicago', WIKIPEDIA: 'Wikimedia Commons', WIKIDATA: 'Wikidata', MANUAL: 'Archivio VisuArt' };
   return map[work?.externalSource] ?? 'Archivio VisuArt';
+}
+
+const RING = { film: 'var(--film)', art: 'var(--art)', film2: 'var(--film-2)', art2: 'var(--art-2)' };
+
+/**
+ * Variabili CSS per i cerchi e la linea che uniscono le due opere: ogni anello prende la tinta
+ * della sua opera (due film = verde acqua e blu, due quadri = arancio e ocra).
+ */
+export function ringStyle(toneA, toneB) {
+  return { '--film-ring': RING[toneA] ?? RING.film, '--art-ring': RING[toneB] ?? RING.art };
+}
+
+/** Tinte della coppia a partire dalle due opere, nell'ordine in cui sono mostrate. */
+export function tonesOf(a, b) {
+  const base = (w) => (w?.type === 'ARTWORK' ? 'art' : 'film');
+  return [base(a), base(b) + (a?.type === b?.type ? '2' : '')];
 }

@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import { ai } from '../api/client';
 import Icon from './ui/Icon';
+import { kindLabel } from '../lib/format';
 
 function errorText(e) {
   if (e?.status === 429) return 'Troppe richieste in poco tempo. Riprova tra un minuto.';
@@ -87,7 +88,7 @@ export default function AiReading({ connectionId, film, art }) {
           <>
             {data.filmThemes.length > 0 && (
               <>
-                <p className="ai-card__group t-film">Film · {film.title}</p>
+                <p className={'ai-card__group t-' + (film.type === 'ARTWORK' ? 'art' : 'film')}>{kindLabel(film)} · {film.title}</p>
                 <div className="ai-card__chips">
                   {data.filmThemes.map((t) => <span key={t} className="ai-chip">{t}</span>)}
                 </div>
@@ -95,7 +96,7 @@ export default function AiReading({ connectionId, film, art }) {
             )}
             {data.artworkThemes.length > 0 && (
               <>
-                <p className="ai-card__group t-art">Opera d’arte · {art.title}</p>
+                <p className={'ai-card__group t-' + (art.type === 'ARTWORK' ? 'art' : 'film') + (art.type === film.type ? '2' : '')}>{kindLabel(art)} · {art.title}</p>
                 <div className="ai-card__chips">
                   {data.artworkThemes.map((t) => <span key={t} className="ai-chip">{t}</span>)}
                 </div>

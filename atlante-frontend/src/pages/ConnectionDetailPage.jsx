@@ -10,19 +10,19 @@ import { ErrorState, Loading } from '../components/ui/States';
 import { Avatar, Motif, PaletteBars, TitlePair } from '../components/ui/Visual';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { artOf, decade, filmOf, longDate, n, readingMinutes, sourceLabel, splitNote } from '../lib/format';
+import { artOf, decade, filmOf, kindLabel, longDate, pairOf, ringStyle, n, readingMinutes, sourceLabel, splitNote } from '../lib/format';
 
-function Frame({ work, kind }) {
+function Frame({ work, tone }) {
   const src = imgUrl(work.imageUrl);
   const [broken, setBroken] = useState(false);
-  const isFilm = kind === 'film';
+  const isFilm = work.type !== 'ARTWORK';
   return (
     <figure>
       <div className="frame__img">
         {src && !broken && <img src={src} alt={`${isFilm ? 'Fotogramma da' : 'Riproduzione di'} ${work.title}`} onError={() => setBroken(true)} />}
       </div>
       <figcaption className="frame__cap">
-        <span className={`kind ${isFilm ? 't-film' : 't-art'}`}>{isFilm ? 'Film' : 'Opera d’arte'}</span>
+        <span className={'kind t-' + tone}>{kindLabel(work)}</span>
         <div>
           <p className="frame__title">{work.title}</p>
           <p>{work.creator}{work.year ? ` · ${work.year}` : ''}</p>
@@ -65,10 +65,10 @@ function ReadProgress() {
 
 /** Perché una connessione è vicina a quella aperta: opera in comune, stesso autore, stessa categoria. */
 function affinity(current, other) {
-  const film = filmOf(current);
-  const art = artOf(current);
-  if (filmOf(other).id === film.id) return { score: 3, reason: `Stesso film · ${film.title}` };
-  if (artOf(other).id === art.id) return { score: 3, reason: `Stessa opera · ${art.title}` };
+  // un'opera in comune, in qualunque posizione: le coppie possono essere anche film–film o opera–opera
+  const mine = [current.source.id, current.target.id];
+  const shared = [other.source, other.target].find((w) => mine.includes(w.id));
+  if (shared) return { score: 3, reason: `${shared.type === 'ARTWORK' ? 'Stessa opera' : 'Stesso film'} · ${shared.title}` };
   if (current.authorUsername && other.authorUsername === current.authorUsername) {
     return { score: 2, reason: `Anche di ${other.authorName ?? other.authorUsername}` };
   }
@@ -177,8 +177,7 @@ export default function ConnectionDetailPage() {
     );
   }
 
-  const film = filmOf(conn);
-  const art = artOf(conn);
+  const { a: film, b: art, toneA, toneB } = pairOf(conn);
   const bothSaved = favIds.has(film.id) && favIds.has(art.id);
   const toggleSave = async () => {
     if (!user) return requireLogin();
@@ -228,7 +227,7 @@ export default function ConnectionDetailPage() {
               <Icon name={like.likedByMe ? 'thumbFill' : 'thumb'} /> Mi piace · {n(like.likeCount)}
             </button>
             <button className={`btn btn--ghost btn--sm ${bothSaved ? 'btn--active' : ''}`} onClick={toggleSave} aria-pressed={bothSaved}>
-              <Icon name={bothSaved ? 'bookmarkFill' : 'bookmark'} /> {bothSaved ? 'Nella tua collezione' : 'Salva film e opera'}
+              <Icon name={bothSaved ? 'bookmarkFill' : 'bookmark'} /> {bothSaved ? 'Nella tua collezione' : (film.type === art.type ? (film.type === 'FILM' ? 'Salva i due film' : 'Salva le due opere') : 'Salva film e opera')}
             </button>
           </div>
           {actionError && <p className="form-error" role="alert">{actionError}</p>}
@@ -237,10 +236,10 @@ export default function ConnectionDetailPage() {
           </p>
         </header>
 
-        <div className="detail-frames">
-          <Frame work={film} kind="film" />
+        <div className="detail-frames" style={ringStyle(toneA, toneB)}>
+          <Frame work={film} tone={toneA} />
           <span className="detail-frames__link" aria-hidden="true" />
-          <Frame work={art} kind="art" />
+          <Frame work={art} tone={toneB} />
         </div>
 
         <div className="detail-body">
@@ -283,8 +282,8 @@ export default function ConnectionDetailPage() {
           <aside className="card color-card">
             <h2>La materia del colore</h2>
             <p className="color-card__intro">I colori dominanti di ciascuna immagine, da copiare o scaricare.</p>
-            <PaletteBars palette={film.palette} label="Film" tone="film" title={film.title} large showHex />
-            <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" title={art.title} large showHex />
+            <PaletteBars palette={film.palette} label={kindLabel(film)} tone={toneA} title={film.title} large showHex />
+            <PaletteBars palette={art.palette} label={kindLabel(art)} tone={toneB} title={art.title} large showHex />
             <div className="color-card__facts">
               {periods && <div className="fact"><span>Periodi</span><strong>{periods}</strong></div>}
               <div className="fact">

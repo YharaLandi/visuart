@@ -306,3 +306,126 @@ h1.mq-sign { margin-top: 8px; }
 /* la barra resta piena mentre si scorre: il testo non le passa sotto */
 .nav { background: var(--nav-bg); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 :root[data-theme="light"] .nav { background: var(--bulb); }
+
+/* nuova critica: ogni opera sceglie il suo tipo */
+.kind-switch { display: flex; gap: 6px; margin-bottom: 10px; }
+.kind-switch .chip { min-height: 36px; }
+
+/* seconda tinta: due opere dello stesso tipo si separano anche per colore */
+:root { --film-2: #8fd0f0; --art-2: #f2c35b; }
+:root[data-theme="light"] { --film-2: #1f5f86; --art-2: #7a5200; }
+.t-film2 { color: var(--film-2) !important; }
+.t-art2 { color: var(--art-2) !important; }
+.t-film { color: var(--film); }
+.t-art { color: var(--art); }
+.mq-tile--film2 { color: #1f6f9a; }
+.mq-tile--art2 { color: #8a5a00; }
+
+/* ---------- cornici delle immagini: pellicola per i film, cornice per i quadri ----------
+   Si applicano a ogni contenitore d'immagine (bacheche, programma, card, dettaglio,
+   collezione, grafo, scheda) e sostituiscono la cornice metallica neutra. */
+
+/* film: striscia di pellicola nera con le perforazioni sui due lati */
+.frame--film {
+  --perf: #e9e6dc;
+  padding: 6px 16px !important;
+  border-radius: 2px !important;
+  background:
+    repeating-linear-gradient(180deg, var(--perf) 0 5px, transparent 5px 11px) left 4px top 3px / 7px calc(100% - 6px) no-repeat,
+    repeating-linear-gradient(180deg, var(--perf) 0 5px, transparent 5px 11px) right 4px top 3px / 7px calc(100% - 6px) no-repeat,
+    #0e0e10 !important;
+  box-shadow: 0 14px 26px -18px #000000b3;
+}
+.frame--film img { border-radius: 1px; }
+/* le miniature hanno perforazioni più fitte e sottili */
+.mq-row__still.frame--film,
+.conn-card__still.frame--film { padding: 3px 9px !important; }
+.mq-row__still.frame--film,
+.conn-card__still.frame--film {
+  background:
+    repeating-linear-gradient(180deg, var(--perf) 0 3px, transparent 3px 7px) left 2px top 2px / 4px calc(100% - 4px) no-repeat,
+    repeating-linear-gradient(180deg, var(--perf) 0 3px, transparent 3px 7px) right 2px top 2px / 4px calc(100% - 4px) no-repeat,
+    #0e0e10 !important;
+}
+
+/* quadro: una cornice vera. border-image usa la foto di una cornice dorata a tortiglione
+   (Rijksmuseum, RP-L-530, CC0, da Wikimedia Commons), virata verso l'arancio delle opere:
+   gli angoli restano fissi, i lati
+   ripetono il cordoncino, il centro non viene disegnato. Dentro, il passe-partout avorio. */
+.frame--art {
+  --frame-w: 18px;
+  border: var(--frame-w) solid #c0602a !important;
+  border-image: url('../assets/frames/cornice-galleria.jpg') 33 / var(--frame-w) round !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background: #ece6d8 !important;
+  background-clip: padding-box !important;
+  box-shadow: 0 16px 26px -16px rgba(0, 0, 0, 0.7) !important;
+}
+.frame--art img {
+  box-sizing: border-box;
+  padding: clamp(6px, 6%, 20px);
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  object-fit: contain;
+  /* smusso del passe-partout verso il dipinto */
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.3), inset -1px -1px 0 rgba(255, 255, 255, 0.55);
+}
+.result__img.frame--art { --frame-w: 10px; }
+.result__img.frame--art img { padding: 5px; }
+.sheet__img.frame--art { --frame-w: 22px; }
+:root[data-theme="light"] .frame--art { box-shadow: 0 12px 22px -16px rgba(20, 20, 20, 0.5) !important; }
+:root[data-theme="light"] .nav .count { background: #141414; color: var(--bulb); }
+
+/* home: la coppia in primo piano sotto l'insegna porta pellicola e cornice */
+.mq-case__glass.frame--art { --frame-w: 22px; }
+.mq-case__glass.frame--art::after { display: none; }
+.mq-case__glass.frame--film::after { inset: 6px 16px; }
+
+/* ---------- correzioni dall'analisi UI/UX ---------- */
+
+/* mobile: i pulsanti con testo lungo vanno a capo invece di allargare la pagina */
+@media (max-width: 760px) {
+  .btn { white-space: normal; max-width: 100%; text-align: center; line-height: 1.15; padding-block: 10px; }
+}
+
+/* testo minimo 12px: etichette dei campi, palette, contatori, meta della chat */
+.field__label, .palette__label, .count, .bell__count, .gnode__type,
+.conv small, .msg__meta, .chat__day, .small, .tiny, .legend span { font-size: max(12px, 0.75rem) !important; }
+.graph__controls .chip { font-size: 0.875rem; }
+
+/* tocchi: i link ai nomi e i link testuali brevi hanno un'area di almeno 24px senza spostare il testo */
+.author-link, .mq-link, .link {
+  display: inline-block;
+  padding-block: 5px;
+  margin-block: -5px;
+}
+
+/* focus visibile anche sui campi di testo: il bordo cambia e compare l'anello giallo */
+.field:focus-within { outline: 3px solid var(--bulb); outline-offset: 2px; }
+.field input:focus-visible, .field textarea:focus-visible { outline: none; }
+
+/* dettaglio: il riquadro prende la forma dell'immagine invece di riempirsi di bande nere.
+   I poster restano verticali, i quadri larghi orizzontali; altezza massima uguale per entrambi,
+   così la coppia resta allineata. */
+.detail-frames { align-items: start; }
+.detail-frames figure { display: grid; justify-items: center; }
+.frame__img {
+  aspect-ratio: auto !important;
+  width: fit-content;
+  max-width: 100%;
+  height: auto !important;
+  background: none !important;
+  border: 0 !important;
+}
+.frame__img img {
+  width: auto !important;
+  max-width: 100%;
+  height: auto !important;
+  max-height: min(68vh, 560px);
+  object-fit: initial !important;
+  background: none !important;
+  display: block;
+}
+.detail-frames .frame__cap { justify-self: stretch; }

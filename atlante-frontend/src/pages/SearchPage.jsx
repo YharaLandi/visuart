@@ -11,7 +11,7 @@ function Result({ item, type, onOpen }) {
   const isArt = type === 'ARTWORK';
   return (
     <button className="result" onClick={() => onOpen(item, type)}>
-      <div className="result__img">{src && <img src={src} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}</div>
+      <div className={'result__img' + (isArt ? ' frame--art' : ' frame--film')}>{src && <img src={src} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}</div>
       <div className="result__cap">
         <span className={`kind ${isArt ? 't-art' : 't-film'}`}>{isArt ? 'Opera d’arte' : 'Film'}</span>
         <div>

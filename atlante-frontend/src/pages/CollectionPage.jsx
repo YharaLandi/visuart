@@ -65,7 +65,7 @@ export default function CollectionPage() {
               const src = imgUrl(w.imageUrl);
               return (
                 <article key={w.id} className="card coll-card">
-                  <div className="coll-card__img">{src && <img src={src} alt={w.title} />}</div>
+                  <div className={'coll-card__img' + (isArt ? ' frame--art' : ' frame--film')}>{src && <img src={src} alt={w.title} />}</div>
                   <div className="coll-card__body">
                     <p className={`eyebrow ${isArt ? 't-art' : 't-film'}`}>{isArt ? 'Opera d’arte' : 'Film'} · Salvata</p>
                     <h3 className={isArt ? 't-art' : 't-film'}>{w.title}</h3>

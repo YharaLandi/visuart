@@ -1,4 +1,4 @@
-import { filmOf, artOf } from '../lib/format';
+import { pairOf } from '../lib/format';
 import '../styles/marquee.css';
 
 /** Una parola composta in tessere, come le lettere mobili dell'insegna. */
@@ -31,12 +31,13 @@ export function SignLine({ text, tone, start = 0, small = false }) {
 }
 
 /**
- * L'insegna a lettere mobili: in cartellone un film CON un dipinto.
+ * L'insegna a lettere mobili: in cartellone un'opera CON un'altra (film o dipinto).
  * size="sm" è la versione in testa a ogni connessione.
  */
 export default function Marquee({ conn, label, size = 'lg', as: Tag = 'div' }) {
-  const film = conn ? filmOf(conn) : null;
-  const art = conn ? artOf(conn) : null;
+  const pair = conn ? pairOf(conn) : null;
+  const film = pair?.a;
+  const art = pair?.b;
   const filmLen = film?.title.length ?? 0;
   return (
     <Tag className={`mq-sign ${size === 'sm' ? 'mq-sign--sm' : ''}`}>
@@ -44,9 +45,9 @@ export default function Marquee({ conn, label, size = 'lg', as: Tag = 'div' }) {
         <SignLine text={label} tone="ink" small />
         {conn ? (
           <>
-            <SignLine text={film.title} tone="film" start={4} />
+            <SignLine text={film.title} tone={pair?.toneA} start={4} />
             <SignLine text="con" tone="ink" start={4 + filmLen} small />
-            <SignLine text={art.title} tone="art" start={8 + filmLen} />
+            <SignLine text={art.title} tone={pair?.toneB} start={8 + filmLen} />
           </>
         ) : (
           <SignLine text="Il programma arriva" tone="ink" start={4} />

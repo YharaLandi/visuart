@@ -7,7 +7,7 @@ import Layout from '../components/ui/Layout';
 import { Avatar } from '../components/ui/Visual';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { artOf, clock, dayLabel, filmOf, ROLE_LABEL, shortWhen } from '../lib/format';
+import { artOf, clock, dayLabel, filmOf, pairOf, ROLE_LABEL, shortWhen } from '../lib/format';
 
 const TYPING_MS = 2500;
 const STATUS = { SENT: 'Inviato', DELIVERED: 'Consegnato', READ: 'Letto' };
@@ -38,7 +38,7 @@ function SharedCard({ id }) {
   return (
     <Link to={`/connessioni/${id}`} className="shared">
       <small>CONNESSIONE CONDIVISA · #{String(id).padStart(3, '0')}</small>
-      <span><span className="t-film">{filmOf(conn).title}</span><Icon name="arrowsLR" className="inline-icon" /><span className="t-art">{artOf(conn).title}</span></span>
+      <span><span className={'t-' + pairOf(conn).toneA}>{filmOf(conn).title}</span><Icon name="arrowsLR" className="inline-icon" /><span className={'t-' + pairOf(conn).toneB}>{artOf(conn).title}</span></span>
     </Link>
   );
 }
@@ -76,7 +76,7 @@ function AttachPicker({ onPick, onClose }) {
       <div className="share-pop__list">
         {list.map((c) => (
           <button key={c.id} onClick={() => onPick(c.id)}>
-            <span className="t-film">{filmOf(c).title}</span><Icon name="arrowsLR" className="inline-icon" /><span className="t-art">{artOf(c).title}</span>
+            <span className={'t-' + pairOf(c).toneA}>{filmOf(c).title}</span><Icon name="arrowsLR" className="inline-icon" /><span className={'t-' + pairOf(c).toneB}>{artOf(c).title}</span>
           </button>
         ))}
       </div>
@@ -325,6 +325,8 @@ export default function ChatPage() {
           ) : (
             <>
               <div className="thread__head">
+                {/* su mobile la colonna con "Conversazioni" è nascosta: il dialogo ha il suo titolo */}
+                <h2 className="sr-only">Conversazione con {activeName}</h2>
                 <button className="icon-btn thread__back" onClick={() => navigate('/chat')} aria-label="Torna alle conversazioni">
                   <Icon name="arrowLeft" />
                 </button>

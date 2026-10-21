@@ -63,8 +63,8 @@ export default function NewCritiquePage() {
   const [loaded, setLoaded] = useState(!editing);
   const [films, setFilms] = useState([]);
   const [arts, setArts] = useState([]);
-  const [filmId, setFilmId] = useState(null);
-  const [artId, setArtId] = useState(null);
+  // le due opere della coppia: ognuna può essere un film o un'opera d'arte
+  const [slots, setSlots] = useState([{ type: 'FILM', id: null }, { type: 'ARTWORK', id: null }]);
   const [category, setCategory] = useState(null);
   const [note, setNote] = useState('');
   const [personal, setPersonal] = useState(true);
@@ -81,10 +81,7 @@ export default function NewCritiquePage() {
     if (!editing) return;
     connectionsApi.get(id)
       .then((c) => {
-        const film = c.source.type === 'FILM' ? c.source : c.target;
-        const art = c.source.type === 'ARTWORK' ? c.source : c.target;
-        setFilmId(film.id);
-        setArtId(art.id);
+        setSlots([{ type: c.source.type, id: c.source.id }, { type: c.target.type, id: c.target.id }]);
         setCategory(c.categorySlug);
         setNote(c.criticalNote);
         setLoaded(true);
@@ -92,12 +89,14 @@ export default function NewCritiquePage() {
       .catch((e) => setError(e.message));
   }, [editing, id]);
 
-  const film = films.find((w) => w.id === filmId);
-  const art = arts.find((w) => w.id === artId);
+  const worksOf = (type) => (type === 'ARTWORK' ? arts : films);
+  const [film, art] = slots.map((sl) => worksOf(sl.type).find((w) => w.id === sl.id));
+  const setSlot = (i, patch) => setSlots((prev) => prev.map((sl, j) => (j === i ? { ...sl, ...patch } : sl)));
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!film || !art) return setError('Scegli un film e un’opera d’arte.');
+    if (!film || !art) return setError('Scegli le due opere da accostare.');
+    if (film.id === art.id) return setError('Scegli due opere diverse.');
     if (!category) return setError('Scegli la categoria della connessione.');
     if (!note.trim()) return setError('Racconta perché queste due opere si parlano.');
     if (!personal) return setError('Conferma che si tratta di un’interpretazione personale.');
@@ -140,16 +139,27 @@ export default function NewCritiquePage() {
         </p>
 
         <div className="critique__cols">
-          <div>
-            <span className="tag tag--film">Film</span>
-            <WorkCombo label="Cerca e seleziona un Film" works={films} value={filmId} onChange={setFilmId} disabled={editing} />
-            {film && <p className="critique__sub">{film.creator} · Cinema</p>}
-          </div>
-          <div>
-            <span className="tag tag--art">Opera d’arte</span>
-            <WorkCombo label="Cerca e seleziona un’Opera" works={arts} value={artId} onChange={setArtId} disabled={editing} />
-            {art && <p className="critique__sub">{art.creator} · Pittura</p>}
-          </div>
+          {slots.map((sl, i) => {
+            const picked = i === 0 ? film : art;
+            const isArt = sl.type === 'ARTWORK';
+            return (
+              <div key={i}>
+                <div className="kind-switch" role="radiogroup" aria-label={i === 0 ? 'Tipo della prima opera' : 'Tipo della seconda opera'}>
+                  {[['FILM', 'Film'], ['ARTWORK', 'Opera d’arte']].map(([t, lbl]) => (
+                    <button key={t} type="button" role="radio" aria-checked={sl.type === t} disabled={editing}
+                      className={`chip ${sl.type === t ? 'chip--active' : ''}`}
+                      onClick={() => sl.type !== t && setSlot(i, { type: t, id: null })}>
+                      {lbl}
+                    </button>
+                  ))}
+                </div>
+                <WorkCombo label={`${i === 0 ? 'Prima' : 'Seconda'} opera: cerca ${isArt ? 'un’opera d’arte' : 'un film'}`}
+                  works={worksOf(sl.type).filter((w) => w.id !== slots[1 - i].id || sl.type !== slots[1 - i].type)}
+                  value={sl.id} onChange={(v) => setSlot(i, { id: v })} disabled={editing} />
+                {picked && <p className="critique__sub">{picked.creator} · {isArt ? 'Pittura' : 'Cinema'}</p>}
+              </div>
+            );
+          })}
         </div>
 
         <div className="critique__motif"><Motif film={film} art={art} size="md" /></div>
