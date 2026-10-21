@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
@@ -14,6 +15,7 @@ const WAYS = [
 ];
 
 export default function HomePage() {
+  const [replay, setReplay] = useState(0);
   return (
     <Layout minimalNav>
       <div className="container">
@@ -31,10 +33,10 @@ export default function HomePage() {
             <p className="hero__aside">Non cerchiamo certezze. Apriamo nuove letture.</p>
           </div>
 
-          <div className="hero__pair">
+          <div className="hero__pair" onMouseEnter={() => setReplay((n) => n + 1)}>
             <div className="hero__circle">
               <span className="motif__c"><img src={heroFilm} alt="In the Mood for Love" /></span>
-              <span className="hero__link" />
+              <span key={replay} className={`hero__link ${replay ? 'hero__link--replay' : ''}`} />
               <div className="hero__cap">
                 <p className="eyebrow eyebrow--light t-film">Film · 2000</p>
                 <h3>In the Mood for Love</h3>

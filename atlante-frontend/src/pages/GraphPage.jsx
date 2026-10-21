@@ -13,7 +13,10 @@ function WorkNode({ data }) {
   const isArt = data.type === 'ARTWORK';
   const src = imgUrl(data.imageUrl);
   return (
-    <div className={`gnode ${isArt ? 'gnode--art' : ''} ${data.selected ? 'gnode--selected' : ''}`}>
+    <div
+      className={`gnode ${isArt ? 'gnode--art' : ''} ${data.selected ? 'gnode--selected' : ''} ${data.path ? 'gnode--path' : ''} ${data.dim ? 'gnode--dim' : ''}`}
+      style={{ '--ring': data.ring }}
+    >
       <Handle type="target" position={Position.Top} />
       <div className="gnode__c">{src && <img src={src} alt="" />}</div>
       <span className="gnode__type">{isArt ? 'OPERA D’ARTE' : 'FILM'}</span>
@@ -25,11 +28,42 @@ function WorkNode({ data }) {
 
 const nodeTypes = { work: WorkNode };
 
+const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 860px)').matches;
+// su mobile gli anelli si allungano in verticale per stare nello schermo stretto
+const STRETCH = IS_MOBILE ? [0.6, 1.25] : [1.35, 0.85];
+const FIT = IS_MOBILE ? { padding: 0.08, minZoom: 0.85 } : { padding: 0.2 };
+
+/** Percorso più breve (in archi) dal nodo centrale a quello sotto il mouse. */
+function shortestPath(edges, from, to) {
+  if (from == null || to == null) return null;
+  const prev = new Map([[from, null]]);
+  const queue = [from];
+  while (queue.length) {
+    const current = queue.shift();
+    if (current === to) break;
+    edges.forEach((e) => {
+      const next = e.sourceId === current ? e.targetId : e.targetId === current ? e.sourceId : null;
+      if (next != null && !prev.has(next)) {
+        prev.set(next, { node: current, edge: e.id });
+        queue.push(next);
+      }
+    });
+  }
+  if (!prev.has(to)) return null;
+  const nodes = new Set([to]);
+  const pathEdges = new Set();
+  for (let step = prev.get(to); step; step = prev.get(step.node)) {
+    nodes.add(step.node);
+    pathEdges.add(step.edge);
+  }
+  return { nodes, edges: pathEdges };
+}
+
 /** Disposizione a anelli: il nodo scelto al centro, gli altri su cerchi concentrici sfalsati. */
 function ringLayout(nodes, centerId) {
   const pos = {};
   const others = nodes.filter((n) => n.id !== centerId);
-  if (centerId != null) pos[centerId] = { x: 0, y: 0 };
+  if (centerId != null) pos[centerId] = { x: 0, y: 0, ring: 0 };
   let ring = 0, placed = 0;
   while (placed < others.length) {
     ring += 1;
@@ -38,7 +72,7 @@ function ringLayout(nodes, centerId) {
     const count = Math.min(capacity, others.length - placed);
     for (let i = 0; i < count; i++) {
       const angle = (2 * Math.PI * i) / count + ring * 0.6;
-      pos[others[placed + i].id] = { x: Math.cos(angle) * radius * 1.35, y: Math.sin(angle) * radius * 0.85 };
+      pos[others[placed + i].id] = { x: Math.cos(angle) * radius * STRETCH[0], y: Math.sin(angle) * radius * STRETCH[1], ring };
     }
     placed += count;
   }
@@ -49,9 +83,9 @@ function Controls() {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   return (
     <div className="graph__controls">
-      <button className="chip" onClick={() => zoomOut()} aria-label="Riduci">−</button>
-      <button className="chip" onClick={() => zoomIn()} aria-label="Ingrandisci">+</button>
-      <button className="chip" onClick={() => fitView({ padding: 0.2, duration: 300 })}>Centra</button>
+      <button className="chip" onClick={() => zoomOut()} aria-label="Riduci"><Icon name="dash-lg" /></button>
+      <button className="chip" onClick={() => zoomIn()} aria-label="Ingrandisci"><Icon name="plus" /></button>
+      <button className="chip" onClick={() => fitView({ ...FIT, duration: 300 })}>Centra</button>
     </div>
   );
 }
@@ -125,6 +159,7 @@ function GraphCanvas() {
   const [data, setData] = useState({ nodes: [], edges: [] });
   const [selectedId, setSelectedId] = useState(centerParam);
   const [status, setStatus] = useState('loading');
+  const [hoverId, setHoverId] = useState(null);
 
   const load = useCallback(() => {
     setStatus('loading');
@@ -141,23 +176,31 @@ function GraphCanvas() {
 
   const positions = useMemo(() => ringLayout(data.nodes, centerParam ?? data.nodes[0]?.id), [data.nodes, centerParam]);
 
+  const centerId = centerParam ?? data.nodes[0]?.id;
+  const path = useMemo(() => shortestPath(data.edges, centerId, hoverId), [data.edges, centerId, hoverId]);
+
   const nodes = useMemo(() => data.nodes.map((n) => ({
     id: String(n.id),
     type: 'work',
+    ariaLabel: `${n.type === 'ARTWORK' ? 'Opera d’arte' : 'Film'} · ${n.title}`,
     position: positions[n.id] ?? { x: 0, y: 0 },
-    data: { ...n, selected: n.id === selectedId },
-  })), [data.nodes, positions, selectedId]);
+    data: { ...n, selected: n.id === selectedId, ring: positions[n.id]?.ring ?? 0, path: path?.nodes.has(n.id), dim: path && !path.nodes.has(n.id) },
+  })), [data.nodes, positions, selectedId, path]);
 
   const edges = useMemo(() => data.edges.map((e) => {
     const active = e.sourceId === selectedId || e.targetId === selectedId;
+    const onPath = path?.edges.has(e.id);
     return {
       id: String(e.id),
       source: String(e.sourceId),
       target: String(e.targetId),
       type: 'default',
-      style: { stroke: active ? '#8a929b' : '#4b5159', strokeWidth: active ? 1.6 : 1.1 },
+      className: onPath ? 'edge--path' : path ? 'edge--dim' : '',
+      style: onPath
+        ? { stroke: 'var(--film-ring)', strokeWidth: 2 }
+        : { stroke: active ? 'var(--edge-active)' : 'var(--edge)', strokeWidth: active ? 1.5 : 1 },
     };
-  }), [data.edges, selectedId]);
+  }), [data.edges, selectedId, path]);
 
   const selected = data.nodes.find((n) => n.id === selectedId);
   const expand = (workId) => {
@@ -197,8 +240,10 @@ function GraphCanvas() {
               edges={edges}
               nodeTypes={nodeTypes}
               onNodeClick={(_, node) => setSelectedId(Number(node.id))}
+              onNodeMouseEnter={(_, node) => setHoverId(Number(node.id))}
+              onNodeMouseLeave={() => setHoverId(null)}
               fitView
-              fitViewOptions={{ padding: 0.2 }}
+              fitViewOptions={FIT}
               minZoom={0.3}
               maxZoom={2}
               nodesConnectable={false}

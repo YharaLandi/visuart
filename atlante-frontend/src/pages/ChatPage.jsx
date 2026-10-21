@@ -361,7 +361,11 @@ export default function ChatPage() {
               </div>
 
               {typing && (
-                <p className="typing"><Avatar name={activeName} size="xs" /> • • • {activeName.split(' ')[0]} sta scrivendo</p>
+                <p className="typing">
+                  <Avatar name={activeName} size="xs" />{' '}
+                  <span className="typing__dots" aria-hidden="true"><i /><i /><i /></span>{' '}
+                  {activeName.split(' ')[0]} sta scrivendo
+                </p>
               )}
 
               {messages.length > 0 && (
