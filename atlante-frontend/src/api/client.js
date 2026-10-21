@@ -86,6 +86,15 @@ export const works = {
   create: (data) => api.post('/api/works', data),
 };
 
+/** Immagine caricata dall'utente (fotogramma, dettaglio di un quadro, opera non negli archivi). */
+export const uploads = {
+  image: (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return request('/api/uploads/image', { method: 'POST', body: form });
+  },
+};
+
 export const connections = {
   list: (categorySlug, sort) => {
     const qs = new URLSearchParams();

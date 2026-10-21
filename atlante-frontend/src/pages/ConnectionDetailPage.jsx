@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { connections as connectionsApi, imgUrl, likes as likesApi } from '../api/client';
 import AiReading from '../components/AiReading';
 import Dialogues from '../components/Dialogues';
+import WorkSheet from '../components/WorkSheet';
 import Icon from '../components/ui/Icon';
 import Marquee from '../components/Marquee';
 import Layout from '../components/ui/Layout';
@@ -12,15 +13,21 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { artOf, decade, filmOf, kindLabel, longDate, pairOf, ringStyle, n, readingMinutes, sourceLabel, splitNote } from '../lib/format';
 
-function Frame({ work, tone }) {
-  const src = imgUrl(work.imageUrl);
+/** Un'opera della coppia: l'immagine è ritagliata nel riquadro, un clic apre la scheda completa. */
+function Frame({ work, tone, image, onOpen }) {
+  const src = imgUrl(image ?? work.imageUrl);
   const [broken, setBroken] = useState(false);
   const isFilm = work.type !== 'ARTWORK';
   return (
     <figure>
-      <div className="frame__img">
-        {src && !broken && <img src={src} alt={`${isFilm ? 'Fotogramma da' : 'Riproduzione di'} ${work.title}`} onError={() => setBroken(true)} />}
-      </div>
+      <button type="button" className="frame__img frame__open" onClick={() => onOpen(work)}
+        aria-label={`Apri la scheda di ${work.title}`}>
+        {src && !broken && (
+          <img src={src} alt={`${isFilm ? 'Fotogramma da' : 'Riproduzione di'} ${work.title}`}
+            onError={() => setBroken(true)} />
+        )}
+        <span className="frame__hint" aria-hidden="true"><Icon name="arrows-fullscreen" /> Apri la scheda</span>
+      </button>
       <figcaption className="frame__cap">
         <span className={'kind t-' + tone}>{kindLabel(work)}</span>
         <div>
@@ -60,6 +67,24 @@ function ReadProgress() {
     <div className="read-progress" aria-hidden="true">
       <span style={{ transform: `scaleX(${progress})` }} />
     </div>
+  );
+}
+
+/** Nastro di pellicola a S coricata: parte dal bordo della prima opera e arriva alla seconda. */
+function FilmRibbon({ id }) {
+  const g = `ribbon-${id}`;
+  const d = 'M0 62 C 70 62, 50 98, 120 98';
+  return (
+    <svg className="detail-ribbon" viewBox="0 0 120 160" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={g} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" style={{ stopColor: 'var(--film-ring)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--art-ring)' }} />
+        </linearGradient>
+      </defs>
+      <path className="detail-ribbon__band" d={d} pathLength="100" stroke={`url(#${g})`} />
+      <path className="detail-ribbon__holes" d={d} pathLength="100" />
+    </svg>
   );
 }
 
@@ -127,6 +152,7 @@ export default function ConnectionDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { favIds, toggleFavorite } = useApp();
+  const [openWork, setOpenWork] = useState(null);
   const [conn, setConn] = useState(null);
   const [status, setStatus] = useState('loading');
   const [like, setLike] = useState({ likeCount: 0, likedByMe: false });
@@ -177,7 +203,7 @@ export default function ConnectionDetailPage() {
     );
   }
 
-  const { a: film, b: art, toneA, toneB } = pairOf(conn);
+  const { a: film, b: art, toneA, toneB, imgA, imgB, palA, palB } = pairOf(conn);
   const bothSaved = favIds.has(film.id) && favIds.has(art.id);
   const toggleSave = async () => {
     if (!user) return requireLogin();
@@ -237,9 +263,10 @@ export default function ConnectionDetailPage() {
         </header>
 
         <div className="detail-frames" style={ringStyle(toneA, toneB)}>
-          <Frame work={film} tone={toneA} />
-          <span className="detail-frames__link" aria-hidden="true" />
-          <Frame work={art} tone={toneB} />
+          <Frame work={film} tone={toneA} image={imgA} onOpen={setOpenWork} />
+          {/* tra le due opere: un nastro di pellicola sinuoso che sfuma dal colore dell'una a quello dell'altra */}
+          <FilmRibbon id={conn.id} />
+          <Frame work={art} tone={toneB} image={imgB} onOpen={setOpenWork} />
         </div>
 
         <div className="detail-body">
@@ -282,8 +309,8 @@ export default function ConnectionDetailPage() {
           <aside className="card color-card">
             <h2>La materia del colore</h2>
             <p className="color-card__intro">I colori dominanti di ciascuna immagine, da copiare o scaricare.</p>
-            <PaletteBars palette={film.palette} label={kindLabel(film)} tone={toneA} title={film.title} large showHex />
-            <PaletteBars palette={art.palette} label={kindLabel(art)} tone={toneB} title={art.title} large showHex />
+            <PaletteBars palette={palA} label={kindLabel(film)} tone={toneA} title={film.title} large showHex />
+            <PaletteBars palette={palB} label={kindLabel(art)} tone={toneB} title={art.title} large showHex />
             <div className="color-card__facts">
               {periods && <div className="fact"><span>Periodi</span><strong>{periods}</strong></div>}
               <div className="fact">
@@ -303,6 +330,18 @@ export default function ConnectionDetailPage() {
         </div>
 
         <Related current={conn} />
+
+        {openWork && (
+          <WorkSheet
+            item={openWork}
+            type={openWork.type}
+            context={`CONNESSIONE N. ${String(conn.id).padStart(3, '0')}`}
+            saved={favIds.has(openWork.id)}
+            onSave={() => (user ? toggleFavorite(openWork.id) : requireLogin())}
+            onRemove={() => toggleFavorite(openWork.id)}
+            onClose={() => setOpenWork(null)}
+          />
+        )}
       </div>
     </Layout>
   );

@@ -9,10 +9,10 @@ import Marquee from '../components/Marquee';
 /** Le due bacheche sotto l'insegna: le due opere della coppia dietro il vetro. */
 function Showcase({ conn }) {
   if (!conn) return <div className="mq-cases mq-cases--empty" aria-hidden="true"><span /><span /></div>;
-  const { a: film, b: art, toneA, toneB } = pairOf(conn);
-  const caseFor = (work, tone, kind) => (
+  const { a: film, b: art, toneA, toneB, imgA, imgB } = pairOf(conn);
+  const caseFor = (work, tone, kind, image) => (
     <figure className={`mq-case mq-case--${tone}`}>
-      <span className={'mq-case__glass' + (work.type === 'ARTWORK' ? ' frame--art' : ' frame--film')}>{imgUrl(work.imageUrl) && <img src={imgUrl(work.imageUrl)} alt={work.title} />}</span>
+      <span className={'mq-case__glass' + (work.type === 'ARTWORK' ? ' frame--art' : ' frame--film')}>{imgUrl(image) && <img src={imgUrl(image)} alt={work.title} />}</span>
       <figcaption>
         <b>{kind}</b> {work.creator}{work.year ? `, ${work.year}` : ''}
       </figcaption>
@@ -20,22 +20,22 @@ function Showcase({ conn }) {
   );
   return (
     <Link to={`/connessioni/${conn.id}`} className="mq-cases" aria-label={`Apri la connessione: ${film.title} con ${art.title}`}>
-      {caseFor(film, toneA, kindLabel(film, true))}
-      {caseFor(art, toneB, kindLabel(art, true))}
+      {caseFor(film, toneA, kindLabel(film, true), imgA)}
+      {caseFor(art, toneB, kindLabel(art, true), imgB)}
       <span className="mq-cases__open">Leggi la critica{conn.authorName ? ` di ${conn.authorName}` : ''} <Icon name="arrowRight" /></span>
     </Link>
   );
 }
 
 function BillRow({ conn, onShow }) {
-  const { a: film, b: art, toneA, toneB } = pairOf(conn);
+  const { a: film, b: art, toneA, toneB, imgA, imgB } = pairOf(conn);
   return (
     <li>
       <Link to={`/connessioni/${conn.id}`} className="mq-row"
         onMouseEnter={() => onShow(conn)} onFocus={() => onShow(conn)}>
         <span className="mq-row__stills" aria-hidden="true">
-          <span className="mq-row__still">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
-          <span className="mq-row__still">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
+          <span className="mq-row__still">{imgUrl(imgA) && <img src={imgUrl(imgA)} alt="" loading="lazy" />}</span>
+          <span className="mq-row__still">{imgUrl(imgB) && <img src={imgUrl(imgB)} alt="" loading="lazy" />}</span>
         </span>
         <span className="mq-row__pair">
           <span className={'mq-row__film t-' + toneA}>{film.title}</span>
@@ -58,7 +58,7 @@ export default function HomePage() {
   const [searching, setSearching] = useState(false);
 
   useEffect(() => {
-    connectionsApi.list(undefined, 'views').then(setAll).catch(() => setLoadFailed(true));
+    connectionsApi.list(undefined, 'popular').then(setAll).catch(() => setLoadFailed(true));
   }, []);
 
   const search = async (e) => {

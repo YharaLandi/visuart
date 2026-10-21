@@ -406,26 +406,149 @@ h1.mq-sign { margin-top: 8px; }
 .field:focus-within { outline: 3px solid var(--bulb); outline-offset: 2px; }
 .field input:focus-visible, .field textarea:focus-visible { outline: none; }
 
-/* dettaglio: il riquadro prende la forma dell'immagine invece di riempirsi di bande nere.
-   I poster restano verticali, i quadri larghi orizzontali; altezza massima uguale per entrambi,
-   così la coppia resta allineata. */
-.detail-frames { align-items: start; }
-.detail-frames figure { display: grid; justify-items: center; }
+/* dettaglio: le due opere nello stesso riquadro verticale, quello del poster (2:3).
+   Le immagini orizzontali vengono ritagliate per riempirlo; un clic apre la scheda con l'opera intera. */
+.detail-frames {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--sp-5);
+  align-items: center;
+  max-width: 920px;
+  margin-inline: auto;
+}
+.detail-frames figure { margin: 0; min-width: 0; align-self: start; }
 .frame__img {
-  aspect-ratio: auto !important;
-  width: fit-content;
-  max-width: 100%;
+  aspect-ratio: 2 / 3 !important;
+  width: 100%;
   height: auto !important;
-  background: none !important;
+  background: var(--surface-2) !important;
   border: 0 !important;
+  overflow: hidden;
 }
 .frame__img img {
-  width: auto !important;
-  max-width: 100%;
-  height: auto !important;
-  max-height: min(68vh, 560px);
-  object-fit: initial !important;
-  background: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center;
   display: block;
 }
-.detail-frames .frame__cap { justify-self: stretch; }
+/* bordo luminoso sfumato nel colore di ciascuna opera */
+.detail-frames figure:first-child .frame__img { box-shadow: 0 0 0 2px var(--film-ring), 0 0 28px -4px var(--film-ring) !important; }
+.detail-frames figure:last-child .frame__img { box-shadow: 0 0 0 2px var(--art-ring), 0 0 28px -4px var(--art-ring) !important; }
+
+/* il nastro di pellicola tra le due opere: banda sfumata e perforazioni scure, si srotola all'apertura */
+.detail-frames { column-gap: 0 !important; grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr) !important; }
+/* il nastro è alto esattamente quanto le immagini (colonna × 3/2), calcolato dalla larghezza della riga */
+.detail-frames { container-type: inline-size; }
+.detail-ribbon { width: 100%; height: calc((100cqw - 110px) / 2 * 1.5); align-self: start; overflow: visible; display: block; }
+.detail-ribbon path { fill: none; vector-effect: non-scaling-stroke; }
+.detail-ribbon__band { stroke-width: 18; stroke-linecap: butt; filter: drop-shadow(0 0 8px rgba(255, 210, 122, 0.25)); }
+.detail-ribbon__holes { stroke: var(--bg); stroke-width: 6; stroke-dasharray: 1.6 2.4; }
+/* il nastro si srotola da sinistra a destra: si rivela con un ritaglio, non col tratteggio,
+   così la banda resta intera anche quando il disegno è stirato in altezza */
+@media (prefers-reduced-motion: no-preference) {
+  .detail-ribbon { clip-path: inset(0 100% 0 0); animation: ribbon-unroll 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; }
+}
+@keyframes ribbon-unroll { to { clip-path: inset(0 0 0 0); } }
+/* le perforazioni compaiono dopo la banda, con il loro tratteggio */
+.detail-frames__link,
+.detail-frames figure .frame__img::before,
+.detail-frames figure .frame__img::after { display: none !important; }
+@media (max-width: 760px) {
+  .detail-frames { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; }
+  .detail-frames { grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr) !important; }
+  .detail-ribbon { height: calc((100cqw - 76px) / 2 * 1.5); }
+  .detail-ribbon__band { stroke-width: 10; }
+  .detail-ribbon__holes { stroke-width: 4; }
+  .detail-frames .frame__cap { grid-template-columns: 1fr; gap: 4px; }
+}
+.detail-frames figure:first-child .frame__img { box-shadow: none; }
+@media (max-width: 760px) {
+  .detail-frames { flex-direction: column; }
+  .detail-frames figure { flex: none; width: 100%; }
+}
+
+
+/* l'immagine ritagliata del dettaglio è un pulsante: apre la scheda con l'opera intera */
+.frame__open { display: block; padding: 0; cursor: var(--cursor-viewfinder); position: relative; color: inherit; font: inherit; }
+.frame__hint {
+  position: absolute; left: 50%; bottom: 14px; transform: translate(-50%, 6px);
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px;
+  background: rgba(12, 12, 14, 0.82); color: #ecebe6; border-radius: 3px;
+  font: 700 0.95rem/1 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase;
+  opacity: 0; transition: opacity 180ms ease-out, transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.frame__open:hover .frame__hint, .frame__open:focus-visible .frame__hint { opacity: 1; transform: translate(-50%, 0); }
+.frame__open:focus-visible { outline: 3px solid var(--bulb); outline-offset: 4px; }
+@media (hover: none) { .frame__hint { opacity: 1; transform: translate(-50%, 0); } }
+
+/* scheda: l'opera intera, la cornice o la pellicola seguono la sua forma */
+.sheet__img { aspect-ratio: auto !important; height: auto !important; align-self: start; }
+.sheet__img img { width: 100%; height: auto !important; max-height: 70vh; object-fit: contain !important; padding: 0 !important; display: block; }
+.sheet__img.frame--art img { padding: clamp(8px, 4%, 18px) !important; }
+
+/* cursore sulle immagini: un mirino da cinepresa giallo (gli angoli del fotogramma), con
+   un filo scuro per leggersi su qualunque immagine; centrato sul punto indicato */
+:root {
+  --cursor-viewfinder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cg fill='none' stroke-linecap='square'%3E%3Cg stroke='%23141414' stroke-width='5'%3E%3Cpath d='M4 12V4h8M24 4h8v8M32 24v8h-8M12 32H4v-8'/%3E%3Ccircle cx='18' cy='18' r='2.5'/%3E%3C/g%3E%3Cg stroke='%23ffd27a' stroke-width='2.5'%3E%3Cpath d='M4 12V4h8M24 4h8v8M32 24v8h-8M12 32H4v-8'/%3E%3Ccircle cx='18' cy='18' r='2.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 18 18, pointer;
+}
+.frame__open, .mq-cases, .conn-card__stills, .mq-row__stills, .result__img, .coll-card__img, .sheet__img,
+.motif { cursor: var(--cursor-viewfinder); }
+
+/* nuova critica: immagine scelta per la connessione e opera aggiunta a mano */
+.pair-image { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.pair-image__thumb { flex: none; width: 64px; aspect-ratio: 2 / 3; background: var(--surface-3); border-radius: 2px; overflow: hidden; }
+.pair-image__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pair-image__body { display: grid; gap: 6px; min-width: 0; }
+.pair-image__label { margin: 0; font: 700 0.85rem/1 var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.pair-image__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.picker__add {
+  display: flex !important; align-items: center; gap: 8px; width: 100%;
+  border-top: 1px solid var(--line-2) !important; color: var(--bulb) !important; font-weight: 700;
+}
+:root[data-theme="light"] .picker__add { color: var(--art) !important; }
+.new-work { margin-top: 12px; padding: 16px; display: grid; gap: 10px; border: 2px dashed var(--line-3); border-radius: 4px; background: var(--surface-2); }
+.new-work__title { margin: 0; font: 800 1.2rem/1 var(--font-display); text-transform: uppercase; }
+.new-work__intro { margin: 0; color: var(--text-muted); font-size: 0.875rem; }
+.new-work__row { display: grid; grid-template-columns: 1fr 110px; gap: 10px; }
+.new-work__actions { display: flex; align-items: center; gap: 14px; }
+
+/* nuova critica: la palette scelta per ciascuna opera */
+.palette-editor { margin-top: 14px; display: grid; gap: 10px; }
+.palette-editor__label { margin: 0; font: 700 0.85rem/1 var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.palette-editor__swatches { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.palette-editor__swatch { position: relative; }
+.palette-editor__swatch label {
+  display: block; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line-3);
+}
+.palette-editor__swatch.is-selected label { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--bulb); }
+.palette-editor__swatch input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.palette-editor__swatch label:focus-within { outline: 3px solid var(--bulb); outline-offset: 3px; }
+.palette-editor__remove {
+  position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; padding: 0;
+  display: grid; place-items: center; border-radius: 50%; border: 0;
+  background: var(--surface-3); color: var(--text-1); font-size: 10px; cursor: pointer;
+  opacity: 0; transition: opacity 150ms ease-out;
+}
+.palette-editor__swatch:hover .palette-editor__remove, .palette-editor__remove:focus-visible { opacity: 1; }
+@media (hover: none) { .palette-editor__remove { opacity: 1; } }
+.palette-editor__add {
+  width: 40px; height: 40px; border-radius: 50%; border: 2px dashed var(--line-3);
+  background: none; color: var(--text-muted); cursor: pointer; display: grid; place-items: center;
+}
+.palette-editor__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+/* palette solo da codice: cerchi selezionabili e campi esadecimali */
+.palette-editor__swatch > button:first-child {
+  display: block; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--line-3);
+}
+.palette-editor__swatch.is-selected > button:first-child { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--bulb); }
+.palette-editor__fields { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.palette-editor__new { display: flex; align-items: end; gap: 8px; }
+.palette-editor__hex { width: 150px; }
+.palette-editor__hex input { font-family: ui-monospace, Menlo, Consolas, monospace; text-transform: lowercase; }
+.palette-editor__hex input[aria-invalid="true"] { color: var(--danger); }
+.palette-editor__hint { margin: 0; font-size: 0.8125rem; color: var(--text-muted); }
+.palette-editor__hint.is-error { color: var(--danger); }

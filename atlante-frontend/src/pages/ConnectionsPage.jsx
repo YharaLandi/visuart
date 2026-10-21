@@ -9,12 +9,14 @@ import { ErrorState, Loading } from '../components/ui/States';
 import { useAuth } from '../context/AuthContext';
 
 const PAGE_SIZE = 9;
-const SORTS = { views: 'Più viste', recent: 'Più recenti' };
+// "In primo piano" usa il punteggio di popolarità del server: mi piace, commenti e viste, con un leggero peso alla novità
+const SORTS = { popular: 'In primo piano', views: 'Più viste', recent: 'Più recenti' };
+const NEXT_SORT = { popular: 'views', views: 'recent', recent: 'popular' };
 
 export default function ConnectionsPage() {
   const { user } = useAuth();
   const [category, setCategory] = useState(null);
-  const [sort, setSort] = useState('views');
+  const [sort, setSort] = useState('popular');
   const [list, setList] = useState([]);
   const [info, setInfo] = useState({ page: 0, totalPages: 0, totalElements: 0 });
   const [status, setStatus] = useState('loading');
@@ -63,7 +65,7 @@ export default function ConnectionsPage() {
           <CategoryChips value={category} onChange={setCategory} />
           <button
             className="toolbar__count"
-            onClick={() => setSort(sort === 'views' ? 'recent' : 'views')}
+            onClick={() => setSort(NEXT_SORT[sort])}
             title="Cambia ordinamento"
           >
             {info.totalElements} connessioni · {SORTS[sort]} <Icon name="arrowDown" />

@@ -26,13 +26,26 @@ export function serial(id) {
 export function pairOf(conn) {
   const { source, target } = conn;
   const mixed = source.type !== target.type;
-  const [a, b] = mixed && source.type === 'ARTWORK' ? [target, source] : [source, target];
+  const swap = mixed && source.type === 'ARTWORK';
+  const [a, b] = swap ? [target, source] : [source, target];
+  // immagine scelta da chi scrive (fotogramma, dettaglio del quadro), altrimenti quella dell'opera
+  const [imgA, imgB] = swap
+    ? [conn.targetImageUrl || target.imageUrl, conn.sourceImageUrl || source.imageUrl]
+    : [conn.sourceImageUrl || source.imageUrl, conn.targetImageUrl || target.imageUrl];
+  // palette scelta da chi scrive, altrimenti quella dell'opera
+  const [palA, palB] = swap
+    ? [conn.targetPalette || target.palette, conn.sourcePalette || source.palette]
+    : [conn.sourcePalette || source.palette, conn.targetPalette || target.palette];
   const base = (w) => (w.type === 'ARTWORK' ? 'art' : 'film');
   return {
     a,
     b,
     toneA: base(a),
     toneB: mixed ? base(b) : `${base(b)}2`,
+    imgA,
+    imgB,
+    palA,
+    palB,
     mixed,
   };
 }
@@ -140,3 +153,4 @@ export function tonesOf(a, b) {
   const base = (w) => (w?.type === 'ARTWORK' ? 'art' : 'film');
   return [base(a), base(b) + (a?.type === b?.type ? '2' : '')];
 }
+
