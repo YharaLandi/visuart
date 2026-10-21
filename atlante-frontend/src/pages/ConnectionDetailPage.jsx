@@ -29,6 +29,37 @@ function Frame({ work, kind }) {
   );
 }
 
+/** Barra in alto che segue la lettura della critica. */
+function ReadProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const article = document.querySelector('.detail-body > article');
+      if (!article) return;
+      const rect = article.getBoundingClientRect();
+      const span = rect.height - window.innerHeight * 0.6;
+      setProgress(Math.min(1, Math.max(0, (window.innerHeight * 0.4 - rect.top) / Math.max(span, 1))));
+    };
+    const onScroll = () => { frame ||= requestAnimationFrame(measure); };
+    measure();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+  return (
+    <div className="read-progress" role="progressbar" aria-label="Avanzamento lettura"
+      aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+      <span style={{ transform: `scaleX(${progress})` }} />
+    </div>
+  );
+}
+
 /** Altre connessioni da leggere, escluse quella aperta. */
 function Related({ currentId }) {
   const [list, setList] = useState([]);
@@ -136,6 +167,7 @@ export default function ConnectionDetailPage() {
   return (
     <Layout>
       <div className="container">
+        <ReadProgress />
         <Link to="/connessioni" className="back"><Icon name="arrowLeft" /> Tutte le connessioni</Link>
 
         <header className="detail-head">
@@ -199,8 +231,8 @@ export default function ConnectionDetailPage() {
           <aside className="card color-card">
             <h2>La materia del colore</h2>
             <p className="color-card__intro">Sei campioni estratti da ciascuna immagine.</p>
-            <PaletteBars palette={film.palette} label="Film" tone="film" large showHex />
-            <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" large showHex />
+            <PaletteBars palette={film.palette} label="Film" tone="film" title={film.title} large showHex />
+            <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" title={art.title} large showHex />
             <div className="color-card__facts">
               <div className="fact"><span>Categoria</span><strong>{conn.category}</strong></div>
               {periods && <div className="fact"><span>Periodi</span><strong>{periods}</strong></div>}
