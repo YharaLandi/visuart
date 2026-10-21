@@ -219,7 +219,13 @@ public class DataSeeder implements CommandLineRunner {
             try {
                 String url = null;
                 if (w.getType() == WorkType.FILM && tmdb.isConfigured()) {
-                    url = tmdb.search(w.getTitle()).stream().findFirst()
+                    // il primo risultato per titolo può essere un altro film ("Lo specchio" →
+                    // "Alice attraverso lo specchio"): si preferisce quello dello stesso anno
+                    var found = tmdb.search(w.getTitle());
+                    url = found.stream()
+                            .filter(r -> w.getYear() != null && w.getYear().equals(r.year()))
+                            .findFirst()
+                            .or(() -> found.stream().findFirst())
                             .map(r -> r.imageUrl()).orElse(null);
                 } else if (w.getType() == WorkType.ARTWORK) {
                     url = artworkUrls.get(w.getTitle());

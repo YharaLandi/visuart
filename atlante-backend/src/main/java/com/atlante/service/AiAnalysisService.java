@@ -39,33 +39,48 @@ public class AiAnalysisService {
 
         Connection conn = connectionRepository.findById(connectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Connessione non trovata: " + connectionId));
-        Work film = conn.getSource().getType() == WorkType.FILM ? conn.getSource() : conn.getTarget();
-        Work art = conn.getSource().getType() == WorkType.ARTWORK ? conn.getSource() : conn.getTarget();
+        // la coppia può essere film–opera, film–film o opera–opera: nelle coppie miste il film viene
+        // prima, come nell'interfaccia. filmThemes/artworkThemes restano i nomi dei campi per la
+        // prima e la seconda opera, così il contratto dell'API non cambia.
+        boolean mixed = conn.getSource().getType() != conn.getTarget().getType();
+        boolean swap = mixed && conn.getSource().getType() == WorkType.ARTWORK;
+        Work first = swap ? conn.getTarget() : conn.getSource();
+        Work second = swap ? conn.getSource() : conn.getTarget();
 
         String prompt = """
                 Sei un assistente per la critica cinematografica e artistica.
-                Analizza l'accostamento cromatico tra un film e un'opera d'arte.
+                Analizza l'accostamento cromatico tra due opere: %s.
 
-                FILM: "%s" di %s (%s), palette dominante: %s
-                OPERA: "%s" di %s (%s), palette dominante: %s
+                PRIMA OPERA (%s): "%s" di %s (%s), palette dominante: %s
+                SECONDA OPERA (%s): "%s" di %s (%s), palette dominante: %s
                 Categoria della connessione critica: %s
 
                 Rispondi SOLO con JSON valido, senza markdown, in questo formato:
                 {"filmThemes":["tema1","tema2","tema3"],"artworkThemes":["tema1","tema2","tema3"],"comparison":"..."}
 
-                filmThemes e artworkThemes: tre aggettivi o temi evocati dalla rispettiva palette
+                filmThemes (prima opera) e artworkThemes (seconda opera): tre aggettivi o temi evocati dalla rispettiva palette
                 (es. "notturno", "febbrile", "domestico"). comparison: un paragrafo in italiano,
                 massimo 100 parole, che confronta le due palette sul piano cromatico e tematico,
                 con tono da critica colta ma accessibile. Non ripetere i dati forniti.
                 """.formatted(
-                film.getTitle(), film.getCreator(), film.getYear(), film.getPalette(),
-                art.getTitle(), art.getCreator(), art.getYear(), art.getPalette(),
+                pairLabel(first, second),
+                kind(first), first.getTitle(), first.getCreator(), first.getYear(), first.getPalette(),
+                kind(second), second.getTitle(), second.getCreator(), second.getYear(), second.getPalette(),
                 conn.getCategory().getName());
 
         String raw = llm.generate(prompt).trim();
         AiAnalysisResponse result = parse(raw);
         cache.put(connectionId, result);
         return result;
+    }
+
+    private static String kind(Work w) {
+        return w.getType() == WorkType.FILM ? "film" : "opera d'arte";
+    }
+
+    private static String pairLabel(Work a, Work b) {
+        if (a.getType() != b.getType()) return "un film e un'opera d'arte";
+        return a.getType() == WorkType.FILM ? "due film" : "due opere d'arte";
     }
 
     private AiAnalysisResponse parse(String raw) {
