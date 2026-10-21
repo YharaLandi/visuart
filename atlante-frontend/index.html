@@ -11,6 +11,10 @@
     />
     <meta name="description" content="VisuArt — un archivio di relazioni tra cinema e arti visive." />
     <title>VisuArt · Cinema e arti visive</title>
+    <script>
+      // tema scelto sul dispositivo (galleria scura o carta avorio), applicato prima del render
+      document.documentElement.dataset.theme = localStorage.getItem('visuart_theme') === 'light' ? 'light' : 'dark';
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -4,6 +4,7 @@ import { account as accountApi } from '../api/client';
 import Icon from '../components/ui/Icon';
 import Layout from '../components/ui/Layout';
 import { useAuth } from '../context/AuthContext';
+import { getTheme, setTheme } from '../lib/theme';
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{12,}$/;
 
@@ -26,6 +27,12 @@ export default function SettingsPage() {
   const [deletePwd, setDeletePwd] = useState('');
   const [msg, setMsg] = useState({});
   const [busy, setBusy] = useState(null);
+  const [theme, setThemeState] = useState(getTheme);
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    setThemeState(next);
+  };
 
   const run = async (key, action, ok) => {
     setBusy(key);
@@ -85,6 +92,7 @@ export default function SettingsPage() {
           <nav className="settings-nav" aria-label="Sezioni impostazioni">
             <a href="#profilo"><Icon name="user" /> Profilo</a>
             <a href="#sicurezza"><Icon name="shield" /> Sicurezza</a>
+            <a href="#aspetto"><Icon name="circle-half" /> Aspetto</a>
             <a href="#notifiche"><Icon name="envelope" /> Mail</a>
             <a href="#account" className="danger"><Icon name="trash" /> Elimina account</a>
           </nav>
@@ -124,6 +132,21 @@ export default function SettingsPage() {
                   {feedback('password')}
                 </div>
               </form>
+            </Section>
+
+            <Section id="aspetto" icon="circle-half" title="Aspetto" intro="Scegli tra la galleria scura e la carta avorio. La scelta resta su questo dispositivo.">
+              <div className="settings__row" style={{ marginTop: 20 }}>
+                <button type="button" role="switch" aria-checked={theme === 'light'} className="switch" onClick={toggleTheme}>
+                  <span className="switch__track">
+                    <span className="switch__thumb"><Icon name={theme === 'light' ? 'sun' : 'moon-stars'} /></span>
+                  </span>
+                  Tema carta avorio
+                </button>
+              </div>
+              <div className="theme-options" aria-hidden="true">
+                <span className="theme-swatch"><i style={{ background: '#0b0d10' }} /> Galleria scura</span>
+                <span className="theme-swatch"><i style={{ background: '#f6f1e7' }} /> Carta avorio</span>
+              </div>
             </Section>
 
             <Section id="notifiche" icon="envelope" title="Mail" intro="Ricevi un riepilogo con critiche, mi piace, commenti, opere salvate e messaggi.">

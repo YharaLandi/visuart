@@ -5,6 +5,7 @@ import { connectNotifications } from '../../api/stomp';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABEL, timeAgo } from '../../lib/format';
+import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
 import { Brand, Footer } from './Visual';
 
@@ -34,6 +35,12 @@ function AvatarMenu() {
   const [open, setOpen] = useState(false);
   const ref = useClickOutside(open, setOpen);
   const go = (to) => { setOpen(false); navigate(to); };
+  const [theme, setThemeState] = useState(getTheme);
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    setThemeState(next);
+  };
 
   return (
     <div className="menu-wrap" ref={ref}>
@@ -46,6 +53,12 @@ function AvatarMenu() {
           <button className="menu__item" onClick={() => go('/profilo')}>Il mio profilo</button>
           <button className="menu__item" onClick={() => go('/collezione')}>La mia collezione</button>
           <button className="menu__item" onClick={() => go('/impostazioni')}>Impostazioni</button>
+          <button className="menu__item menu__item--switch" role="menuitemcheckbox" aria-checked={theme === 'light'} onClick={toggleTheme}>
+            Tema carta avorio
+            <span className="switch__track" aria-hidden="true">
+              <span className="switch__thumb"><Icon name={theme === 'light' ? 'sun' : 'moon-stars'} /></span>
+            </span>
+          </button>
           {user.role === 'ADMIN' && (
             <button className="menu__item" onClick={() => go('/admin')}>Gestione utenti</button>
           )}
