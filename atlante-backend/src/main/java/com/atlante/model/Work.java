@@ -25,6 +25,10 @@ public class Work {
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
+    /** Solo per i film: un fotogramma (la locandina resta in imageUrl e si vede nella scheda). */
+    @Column(name = "still_url")
+    private String stillUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "external_source", length = 20)
     private ExternalSource externalSource = ExternalSource.MANUAL;
@@ -58,6 +62,8 @@ public class Work {
     public Integer getYear() { return year; }
     public void setYear(Integer year) { this.year = year; }
     public String getImageUrl() { return imageUrl; }
+    public String getStillUrl() { return stillUrl; }
+    public void setStillUrl(String stillUrl) { this.stillUrl = stillUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public ExternalSource getExternalSource() { return externalSource; }
     public void setExternalSource(ExternalSource externalSource) { this.externalSource = externalSource; }

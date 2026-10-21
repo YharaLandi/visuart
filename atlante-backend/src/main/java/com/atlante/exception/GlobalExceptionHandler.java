@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> handleTooLarge(org.springframework.web.multipart.MaxUploadSizeExceededException e) {
-        return error(HttpStatus.PAYLOAD_TOO_LARGE, "La foto supera i 2 MB: scegline una più leggera.");
+        return error(HttpStatus.PAYLOAD_TOO_LARGE, "Il file è troppo grande: la foto profilo può pesare al massimo 2 MB, le altre immagini 5 MB.");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)

@@ -114,14 +114,22 @@ public final class Dtos {
     public record ConnectionRequest(@NotNull Long sourceWorkId,
                                     @NotNull Long targetWorkId,
                                     @NotBlank String categorySlug,
-                                    @NotBlank @Size(max = 3000) String criticalNote) {
+                                    @NotBlank @Size(max = 3000) String criticalNote,
+                                    String sourceImageUrl,
+                                    String targetImageUrl,
+                                    @Pattern(regexp = PALETTE, message = "da 3 a 8 colori esadecimali separati da virgola") String sourcePalette,
+                                    @Pattern(regexp = PALETTE, message = "da 3 a 8 colori esadecimali separati da virgola") String targetPalette) {
+        /** "#1a2b3c,#445566,…": da 3 a 8 colori. */
+        public static final String PALETTE = "^#[0-9a-fA-F]{6}(,#[0-9a-fA-F]{6}){2,7}$";
     }
 
     public record ConnectionResponse(Long id, WorkResponse source, WorkResponse target,
                                      String category, String categorySlug, String criticalNote,
                                      String authorName, String authorUsername, String authorRole,
                                      java.time.Instant createdAt, long viewCount,
-                                     long likeCount, boolean likedByMe, long commentCount) {
+                                     long likeCount, boolean likedByMe, long commentCount,
+                                     String sourceImageUrl, String targetImageUrl,
+                                     String sourcePalette, String targetPalette) {
 
         public static ConnectionResponse from(Connection c, long likeCount, boolean likedByMe, long commentCount) {
             return new ConnectionResponse(c.getId(),
@@ -130,7 +138,9 @@ public final class Dtos {
                     c.getAuthor() != null ? c.getAuthor().getDisplayName() : null,
                     c.getAuthor() != null ? c.getAuthor().getUsername() : null,
                     c.getAuthor() != null ? c.getAuthor().getRole().name() : null,
-                    c.getCreatedAt(), c.getViewCount(), likeCount, likedByMe, commentCount);
+                    c.getCreatedAt(), c.getViewCount(), likeCount, likedByMe, commentCount,
+                    c.getSourceImageUrl(), c.getTargetImageUrl(),
+                    c.getSourcePalette(), c.getTargetPalette());
         }
     }
 

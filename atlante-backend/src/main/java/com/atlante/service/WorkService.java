@@ -19,11 +19,14 @@ public class WorkService {
     private final com.atlante.repository.ConnectionRepository connectionRepository;
     private final com.atlante.repository.FavoriteRepository favoriteRepository;
     private final com.atlante.repository.WorkImageRepository workImageRepository;
+    private final ImageUploadService imageUploads;
 
     public WorkService(WorkRepository workRepository,
                        com.atlante.repository.ConnectionRepository connectionRepository,
                        com.atlante.repository.FavoriteRepository favoriteRepository,
-                       com.atlante.repository.WorkImageRepository workImageRepository) {
+                       com.atlante.repository.WorkImageRepository workImageRepository,
+                       ImageUploadService imageUploads) {
+        this.imageUploads = imageUploads;
         this.workRepository = workRepository;
         this.connectionRepository = connectionRepository;
         this.favoriteRepository = favoriteRepository;
@@ -56,12 +59,21 @@ public class WorkService {
         return WorkResponse.from(getEntity(id));
     }
 
+    /**
+     * Opera aggiunta a mano da un utente, quando non è negli archivi esterni: l'immagine è
+     * quella caricata (/images/uploads/...) e la palette si ricava da lì.
+     */
     public WorkResponse create(WorkRequest req) {
-        Work work = new Work(req.type(), req.title(), req.creator(), req.year());
-        work.setImageUrl(req.imageUrl());
-        work.setDescription(req.description());
-        work.setPalette(req.palette());
+        Work work = new Work(req.type(), req.title().trim(), blankToNull(req.creator()), req.year());
+        String image = imageUploads.requireUploaded(req.imageUrl());
+        work.setImageUrl(image);
+        work.setDescription(blankToNull(req.description()));
+        work.setPalette(req.palette() != null ? req.palette() : imageUploads.paletteOf(image));
         return WorkResponse.from(workRepository.save(work));
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
     }
 
     public WorkResponse update(Long id, WorkRequest req) {

@@ -33,6 +33,7 @@ public class ConnectionService {
     private final WorkService workService;
     private final LikeService likeService;
     private final com.atlante.repository.NotificationRepository notificationRepository;
+    private final com.atlante.service.ImageUploadService imageUploads;
 
     @Transactional(readOnly = true)
     public List<ConnectionResponse> findAll(String categorySlug, String viewerUsername) {
@@ -40,6 +41,24 @@ public class ConnectionService {
                 ? connectionRepository.findByCategorySlug(categorySlug)
                 : connectionRepository.findAll();
         return toResponses(list, viewerUsername);
+    }
+
+    /** Connessioni ordinate per popolarità (vedi {@link PopularityScore}). */
+    @Transactional(readOnly = true)
+    public List<ConnectionResponse> findAllByPopularity(String categorySlug, String viewerUsername) {
+        return byPopularity(findAll(categorySlug, viewerUsername));
+    }
+
+    private static final String POPULAR = "popular";
+
+    private List<ConnectionResponse> byPopularity(List<ConnectionResponse> list) {
+        java.time.Instant now = java.time.Instant.now();
+        java.util.function.ToDoubleFunction<ConnectionResponse> score = c ->
+                PopularityScore.of(c.likeCount(), c.commentCount(), c.viewCount(), c.createdAt(), now);
+        return list.stream()
+                .sorted(java.util.Comparator.comparingDouble(score).reversed()
+                        .thenComparing(ConnectionResponse::id, java.util.Comparator.reverseOrder()))
+                .toList();
     }
 
     /** Connessioni ordinate per numero di visualizzazioni (le più aperte prima). */
@@ -66,9 +85,10 @@ public class ConnectionService {
     public com.atlante.dto.Dtos.PageResponse<ConnectionResponse> search(
             String q, String categorySlug, com.atlante.model.WorkType type, String author,
             String sort, int page, int size, String viewerUsername) {
-        org.springframework.data.domain.Sort order = SORTS.get(sort == null ? "views" : sort.toLowerCase());
-        if (order == null) {
-            throw new IllegalArgumentException("sort: valori ammessi " + String.join(", ", SORTS.keySet()));
+        String key = sort == null ? POPULAR : sort.toLowerCase();
+        org.springframework.data.domain.Sort order = SORTS.get(key);
+        if (order == null && !POPULAR.equals(key)) {
+            throw new IllegalArgumentException("sort: valori ammessi popular, " + String.join(", ", SORTS.keySet()));
         }
         if (page < 0 || size < 1) {
             throw new IllegalArgumentException("page deve essere >= 0 e size >= 1");
@@ -78,8 +98,18 @@ public class ConnectionService {
                 .and(ConnectionSpecifications.inCategory(categorySlug))
                 .and(ConnectionSpecifications.involving(type))
                 .and(ConnectionSpecifications.byAuthor(author));
+        int pageSize = Math.min(size, MAX_PAGE_SIZE);
+        if (POPULAR.equals(key)) {
+            // il punteggio dipende da mi piace e commenti, che non stanno nella tabella:
+            // si ordina in memoria (l'archivio è di centinaia di connessioni, non di milioni)
+            List<ConnectionResponse> ranked = byPopularity(toResponses(connectionRepository.findAll(spec), viewerUsername));
+            int from = Math.min(page * pageSize, ranked.size());
+            int to = Math.min(from + pageSize, ranked.size());
+            int pages = (int) Math.ceil(ranked.size() / (double) pageSize);
+            return new com.atlante.dto.Dtos.PageResponse<>(ranked.subList(from, to), page, pageSize, ranked.size(), pages);
+        }
         var result = connectionRepository.findAll(spec,
-                org.springframework.data.domain.PageRequest.of(page, Math.min(size, MAX_PAGE_SIZE), order));
+                org.springframework.data.domain.PageRequest.of(page, pageSize, order));
         List<ConnectionResponse> content = toResponses(result.getContent(), viewerUsername);
         return new com.atlante.dto.Dtos.PageResponse<>(content, result.getNumber(), result.getSize(),
                 result.getTotalElements(), result.getTotalPages());
@@ -114,6 +144,10 @@ public class ConnectionService {
                 workService.getEntity(req.sourceWorkId()),
                 workService.getEntity(req.targetWorkId()),
                 category, req.criticalNote(), author);
+        connection.setSourceImageUrl(imageUploads.requireUploaded(req.sourceImageUrl()));
+        connection.setTargetImageUrl(imageUploads.requireUploaded(req.targetImageUrl()));
+        connection.setSourcePalette(normalizePalette(req.sourcePalette()));
+        connection.setTargetPalette(normalizePalette(req.targetPalette()));
         return toResponses(List.of(connectionRepository.save(connection)), authorUsername).getFirst();
     }
 
@@ -122,6 +156,11 @@ public class ConnectionService {
         checkOwnership(connection, username, "Puoi modificare solo le tue connessioni");
         connection.setCategory(findCategory(req.categorySlug()));
         connection.setCriticalNote(req.criticalNote());
+        // in modifica si possono cambiare o togliere le immagini scelte (null = immagine dell'opera)
+        connection.setSourceImageUrl(imageUploads.requireUploaded(req.sourceImageUrl()));
+        connection.setTargetImageUrl(imageUploads.requireUploaded(req.targetImageUrl()));
+        connection.setSourcePalette(normalizePalette(req.sourcePalette()));
+        connection.setTargetPalette(normalizePalette(req.targetPalette()));
         return toResponses(List.of(connection), username).getFirst();
     }
 
@@ -132,6 +171,11 @@ public class ConnectionService {
         commentRepository.deleteAll(commentRepository.findByConnectionIdOrderByCreatedAtAsc(id));
         notificationRepository.deleteByConnectionId(id);
         connectionRepository.delete(connection);
+    }
+
+    /** Palette in minuscolo, senza spazi; vuota = si usa quella dell'opera. */
+    private static String normalizePalette(String palette) {
+        return palette == null || palette.isBlank() ? null : palette.replace(" ", "").toLowerCase();
     }
 
     private Category findCategory(String slug) {

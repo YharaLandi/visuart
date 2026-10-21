@@ -46,6 +46,9 @@ public class AiAnalysisService {
         boolean swap = mixed && conn.getSource().getType() == WorkType.ARTWORK;
         Work first = swap ? conn.getTarget() : conn.getSource();
         Work second = swap ? conn.getSource() : conn.getTarget();
+        // se chi scrive ha scelto le sue palette, la lettura parte da quelle
+        String firstPalette = paletteOr(swap ? conn.getTargetPalette() : conn.getSourcePalette(), first);
+        String secondPalette = paletteOr(swap ? conn.getSourcePalette() : conn.getTargetPalette(), second);
 
         String prompt = """
                 Sei un assistente per la critica cinematografica e artistica.
@@ -64,14 +67,18 @@ public class AiAnalysisService {
                 con tono da critica colta ma accessibile. Non ripetere i dati forniti.
                 """.formatted(
                 pairLabel(first, second),
-                kind(first), first.getTitle(), first.getCreator(), first.getYear(), first.getPalette(),
-                kind(second), second.getTitle(), second.getCreator(), second.getYear(), second.getPalette(),
+                kind(first), first.getTitle(), first.getCreator(), first.getYear(), firstPalette,
+                kind(second), second.getTitle(), second.getCreator(), second.getYear(), secondPalette,
                 conn.getCategory().getName());
 
         String raw = llm.generate(prompt).trim();
         AiAnalysisResponse result = parse(raw);
         cache.put(connectionId, result);
         return result;
+    }
+
+    private static String paletteOr(String chosen, Work w) {
+        return chosen != null && !chosen.isBlank() ? chosen : w.getPalette();
     }
 
     private static String kind(Work w) {

@@ -25,19 +25,20 @@ public class ConnectionController {
                                             @RequestParam(required = false) String sort,
                                             @AuthenticationPrincipal UserDetails principal) {
         String viewer = principal != null ? principal.getUsername() : null;
+        if ("popular".equalsIgnoreCase(sort)) return connectionService.findAllByPopularity(category, viewer);
         return "views".equalsIgnoreCase(sort)
                 ? connectionService.findAllByViews(category, viewer)
                 : connectionService.findAll(category, viewer);
     }
 
-    /** Ricerca paginata: ?q=&category=&type=FILM&author=&sort=views|recent|oldest&page=0&size=12 */
+    /** Ricerca paginata: ?q=&category=&type=FILM&author=&sort=popular|views|recent|oldest&page=0&size=12 */
     @GetMapping("/search")
     public com.atlante.dto.Dtos.PageResponse<ConnectionResponse> search(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) com.atlante.model.WorkType type,
             @RequestParam(required = false) String author,
-            @RequestParam(defaultValue = "views") String sort,
+            @RequestParam(defaultValue = "popular") String sort,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @AuthenticationPrincipal UserDetails principal) {

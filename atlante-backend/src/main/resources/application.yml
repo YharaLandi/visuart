@@ -3,8 +3,8 @@ spring:
     name: atlante-backend
   servlet:
     multipart:
-      max-file-size: 2MB
-      max-request-size: 3MB
+      max-file-size: 5MB
+      max-request-size: 6MB
   profiles:
     default: dev
   config:

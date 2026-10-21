@@ -29,7 +29,7 @@ import java.util.Optional;
  */
 @Component
 @ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE - 10)
 @RequiredArgsConstructor
 public class DesignDemoSeeder implements CommandLineRunner {
 
