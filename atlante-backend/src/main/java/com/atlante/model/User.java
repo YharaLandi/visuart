@@ -45,6 +45,11 @@ public class User implements UserDetails {
     @Column(length = 300)
     private String bio;
 
+    /** Nome del file della foto profilo nella cartella avatars; null = si mostra l'iniziale. */
+    @JsonIgnore
+    @Column(name = "avatar_file", length = 120)
+    private String avatarFile;
+
     @Column(name = "created_at")
     @Builder.Default
     private java.time.Instant createdAt = java.time.Instant.now();

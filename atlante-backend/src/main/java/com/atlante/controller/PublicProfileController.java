@@ -39,6 +39,7 @@ public class PublicProfileController {
                 user.getCreatedAt(),
                 connectionRepository.findByAuthor(user).size(),
                 likeRepository.countReceivedBy(user),
-                commentRepository.countByAuthor(user));
+                commentRepository.countByAuthor(user),
+                user.getAvatarFile() != null);
     }
 }

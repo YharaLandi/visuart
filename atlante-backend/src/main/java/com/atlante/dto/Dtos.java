@@ -34,11 +34,11 @@ public final class Dtos {
     }
 
     public record UserResponse(Long id, String username, String email, String displayName, String role,
-                               String bio, java.time.Instant createdAt) {
+                               String bio, java.time.Instant createdAt, boolean hasAvatar) {
 
         public static UserResponse from(com.atlante.model.User u) {
             return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getDisplayName(),
-                    u.getRole().name(), u.getBio(), u.getCreatedAt());
+                    u.getRole().name(), u.getBio(), u.getCreatedAt(), u.getAvatarFile() != null);
         }
     }
 
@@ -49,7 +49,7 @@ public final class Dtos {
     /** Profilo visibile a tutti: niente email. */
     public record PublicProfile(String username, String displayName, String role, String bio,
                                 java.time.Instant createdAt, long connections, long likesReceived,
-                                long comments) {
+                                long comments, boolean hasAvatar) {
     }
 
     public record UpdateProfileRequest(@NotBlank @Size(max = 120) String displayName,

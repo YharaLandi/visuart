@@ -4,6 +4,9 @@ app:
   # i test non devono mai spedire mail vere, anche se secrets.yml contiene la password
   mail:
     enabled: false
+  # le foto profilo dei test finiscono in target, non nella cartella vera delle immagini
+  images:
+    storage-dir: ./target/test-images
 
 spring:
   datasource:
