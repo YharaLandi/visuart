@@ -16,7 +16,7 @@ export function Loading({ title = 'Raccogliamo le connessioni…' }) {
 export function ErrorState({ onRetry, text = 'Le tue opere sono al sicuro. Verifica la connessione e riprova.' }) {
   return (
     <div className="state" role="alert">
-      <h3>backend non raggiungibile</h3>
+      <h3>Non riusciamo a raggiungere l’archivio.</h3>
       <p>{text}</p>
       {onRetry && <button className="btn btn--ghost btn--sm" onClick={onRetry}>Riprova</button>}
     </div>

@@ -1,96 +1,113 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { ai } from '../api/client';
 import Icon from './ui/Icon';
 
-/** Blocco "Lettura AI" nei quattro stati della libreria: vuoto, caricamento, generata, errore. */
+function errorText(e) {
+  if (e?.status === 429) return 'Troppe richieste in poco tempo. Riprova tra un minuto.';
+  return 'La lettura AI non è disponibile in questo momento.';
+}
+
+/**
+ * "Lettura AI": supporto alla critica, mai al posto della voce dell'autore.
+ * Stati: vuoto, caricamento, generata (richiudibile), errore.
+ */
 export default function AiReading({ connectionId, film, art }) {
   const [state, setState] = useState('empty');
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [open, setOpen] = useState(true);
+  const [generatedAt, setGeneratedAt] = useState(null);
+  const bodyId = useId();
 
   useEffect(() => {
     setState('empty');
     setData(null);
+    setOpen(true);
   }, [connectionId]);
 
   const generate = async () => {
     setState('loading');
     try {
       setData(await ai.analyze(connectionId));
+      setGeneratedAt(new Date());
+      setOpen(true);
       setState('done');
     } catch (e) {
-      setError(e.message);
+      setError(errorText(e));
       setState('error');
     }
   };
 
-  const LABEL = { empty: 'VUOTO', loading: 'CARICAMENTO', done: 'GENERATA', error: 'ERRORE' };
+  const time = generatedAt?.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <section className="ai-card" aria-live="polite">
+    <section className="ai-card" aria-labelledby={`${bodyId}-title`}>
       <div className="ai-card__head">
-        <span className="ai-card__title"><Icon name="sparkles" /> Lettura AI</span>
-        <span className="ai-card__state">{LABEL[state]}</span>
+        <h2 className="ai-card__title" id={`${bodyId}-title`}><Icon name="sparkles" /> Lettura AI</h2>
+        {state === 'done' && (
+          <button type="button" className="ai-card__toggle" onClick={() => setOpen((o) => !o)}
+            aria-expanded={open} aria-controls={bodyId}>
+            {open ? 'Nascondi' : 'Mostra'} <Icon name={open ? 'chevronDown' : 'chevronRight'} size={12} />
+          </button>
+        )}
       </div>
 
-      {state === 'empty' && (
-        <>
-          <p className="ai-card__intro">
-            Esplora affinità di temi, trama e palette. La tua interpretazione resta il punto di partenza.
-          </p>
-          <button className="btn btn--ghost btn--sm" style={{ marginTop: 18 }} onClick={generate}>
-            <Icon name="sparkles" /> Genera una lettura
-          </button>
-        </>
-      )}
-
-      {state === 'loading' && (
-        <>
-          <p className="ai-card__intro">Stiamo mettendo in relazione temi e colori…</p>
-          <div className="ai-card__bars">
-            <div className="skeleton" /><div className="skeleton" /><div className="skeleton" style={{ width: '32%' }} />
+      <div id={bodyId} aria-live="polite" hidden={state === 'done' && !open}>
+        {state === 'empty' && (
+          <div className="ai-card__row">
+            <p className="ai-card__intro">
+              Un confronto di temi e palette, generato su richiesta. La critica resta il punto di partenza.
+            </p>
+            <button className="btn btn--ghost btn--sm" onClick={generate}>
+              <Icon name="sparkles" /> Genera una lettura
+            </button>
           </div>
-        </>
-      )}
+        )}
 
-      {state === 'error' && (
-        <>
-          <p className="ai-card__intro" style={{ color: 'var(--text)' }}>{error || 'backend non raggiungibile'}</p>
-          <p className="ai-card__note" style={{ fontSize: 12 }}>La critica è al sicuro. Riprova tra qualche istante.</p>
-          <button className="btn btn--ghost btn--sm" style={{ marginTop: 18 }} onClick={generate}>
-            <Icon name="refresh" /> Riprova
-          </button>
-        </>
-      )}
+        {state === 'loading' && (
+          <>
+            <p className="ai-card__intro">Stiamo mettendo in relazione temi e colori…</p>
+            <div className="ai-card__bars" aria-hidden="true">
+              <div className="skeleton" style={{ width: '40%' }} /><div className="skeleton" />
+              <div className="skeleton" /><div className="skeleton" style={{ width: '70%' }} />
+            </div>
+          </>
+        )}
 
-      {state === 'done' && data && (
-        <>
-          {data.filmThemes.length > 0 && (
-            <>
-              <p className="ai-card__group t-film">Film · {film.title}</p>
-              <div className="ai-card__chips">
-                {data.filmThemes.map((t, i) => (
-                  <span key={t} className={`ai-chip ${i === 0 ? 'ai-chip--film' : ''}`}>{t}</span>
-                ))}
-              </div>
-            </>
-          )}
-          {data.artworkThemes.length > 0 && (
-            <>
-              <p className="ai-card__group t-art">Opera d’arte · {art.title}</p>
-              <div className="ai-card__chips">
-                {data.artworkThemes.map((t, i) => (
-                  <span key={t} className={`ai-chip ${i === 0 ? 'ai-chip--art' : ''}`}>{t}</span>
-                ))}
-              </div>
-            </>
-          )}
-          <p className="ai-card__text">{data.comparison}</p>
-          <p className="ai-card__note">
-            Testo generato con AI. Può contenere imprecisioni: non documenta un’influenza storica. Verifica sempre le fonti.
-          </p>
-        </>
-      )}
+        {state === 'error' && (
+          <div className="ai-card__row">
+            <p className="ai-card__intro">{error} La critica non cambia.</p>
+            <button className="btn btn--ghost btn--sm" onClick={generate}>
+              <Icon name="refresh" /> Riprova
+            </button>
+          </div>
+        )}
+
+        {state === 'done' && data && (
+          <>
+            {data.filmThemes.length > 0 && (
+              <>
+                <p className="ai-card__group t-film">Film · {film.title}</p>
+                <div className="ai-card__chips">
+                  {data.filmThemes.map((t) => <span key={t} className="ai-chip">{t}</span>)}
+                </div>
+              </>
+            )}
+            {data.artworkThemes.length > 0 && (
+              <>
+                <p className="ai-card__group t-art">Opera d’arte · {art.title}</p>
+                <div className="ai-card__chips">
+                  {data.artworkThemes.map((t) => <span key={t} className="ai-chip">{t}</span>)}
+                </div>
+              </>
+            )}
+            <p className="ai-card__text">{data.comparison}</p>
+            <p className="ai-card__note">
+              Generata con AI{time ? ` alle ${time}` : ''}. Può contenere imprecisioni e non documenta un’influenza storica.
+            </p>
+          </>
+        )}
+      </div>
     </section>
   );
 }

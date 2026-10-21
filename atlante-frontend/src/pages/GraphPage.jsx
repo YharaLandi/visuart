@@ -31,7 +31,7 @@ const nodeTypes = { work: WorkNode };
 const IS_MOBILE = typeof window !== 'undefined' && window.matchMedia('(max-width: 860px)').matches;
 // su mobile gli anelli si allungano in verticale per stare nello schermo stretto
 const STRETCH = IS_MOBILE ? [0.6, 1.25] : [1.35, 0.85];
-const FIT = IS_MOBILE ? { padding: 0.08, minZoom: 0.85 } : { padding: 0.2 };
+const FIT = IS_MOBILE ? { padding: 0.08, minZoom: 0.85 } : { padding: 0.12, minZoom: 0.75 };
 
 /** Percorso più breve (in archi) dal nodo centrale a quello sotto il mouse. */
 function shortestPath(edges, from, to) {

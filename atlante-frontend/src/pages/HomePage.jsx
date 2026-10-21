@@ -1,85 +1,161 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { connections as connectionsApi, imgUrl } from '../api/client';
 import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
-import heroFilm from '../assets/visuart/hero-film.jpg';
-import heroArt from '../assets/visuart/hero-art.jpg';
-import explore from '../assets/visuart/home-explore.jpg';
-import graph from '../assets/visuart/home-graph.jpg';
-import collection from '../assets/visuart/home-collection.jpg';
+import { artOf, filmOf } from '../lib/format';
+import Marquee from '../components/Marquee';
 
-const WAYS = [
-  { to: '/connessioni', tag: 'Esplora', num: '01', title: 'Più viste', text: 'Le connessioni che accendono lo sguardo', img: explore },
-  { to: '/grafo', tag: 'Orientati', num: '02', title: 'Grafo', text: 'Segui il filo tra un’opera e l’altra', img: graph },
-  { to: '/collezione', tag: 'Conserva', num: '03', title: 'La mia collezione', text: 'Un atlante personale di affinità', img: collection },
-];
+/** Le due bacheche sotto l'insegna: il fotogramma e il dipinto dietro il vetro. */
+function Showcase({ conn }) {
+  if (!conn) return <div className="mq-cases mq-cases--empty" aria-hidden="true"><span /><span /></div>;
+  const film = filmOf(conn);
+  const art = artOf(conn);
+  const caseFor = (work, tone, kind) => (
+    <figure className={`mq-case mq-case--${tone}`}>
+      <span className="mq-case__glass">{imgUrl(work.imageUrl) && <img src={imgUrl(work.imageUrl)} alt={work.title} />}</span>
+      <figcaption>
+        <b>{kind}</b> {work.creator}{work.year ? `, ${work.year}` : ''}
+      </figcaption>
+    </figure>
+  );
+  return (
+    <Link to={`/connessioni/${conn.id}`} className="mq-cases" aria-label={`Apri la connessione: ${film.title} con ${art.title}`}>
+      {caseFor(film, 'film', 'Film')}
+      {caseFor(art, 'art', 'Opera')}
+      <span className="mq-cases__open">Leggi la critica{conn.authorName ? ` di ${conn.authorName}` : ''} <Icon name="arrowRight" /></span>
+    </Link>
+  );
+}
+
+function BillRow({ conn, onShow }) {
+  const film = filmOf(conn);
+  const art = artOf(conn);
+  return (
+    <li>
+      <Link to={`/connessioni/${conn.id}`} className="mq-row"
+        onMouseEnter={() => onShow(conn)} onFocus={() => onShow(conn)}>
+        <span className="mq-row__stills" aria-hidden="true">
+          <span className="mq-row__still mq-row__still--film">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
+          <span className="mq-row__still mq-row__still--art">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
+        </span>
+        <span className="mq-row__pair">
+          <span className="mq-row__film">{film.title}</span>
+          <span className="mq-row__con"> con </span>
+          <span className="mq-row__art">{art.title}</span>
+        </span>
+        <span className="mq-row__meta">{conn.category}{conn.authorName ? ` · ${conn.authorName}` : ''}</span>
+        <span className="mq-row__go" aria-hidden="true"><Icon name="arrowRight" /></span>
+      </Link>
+    </li>
+  );
+}
 
 export default function HomePage() {
-  const [replay, setReplay] = useState(0);
+  const [all, setAll] = useState(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [shown, setShown] = useState(null);
+  const [q, setQ] = useState('');
+  const [results, setResults] = useState(null);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    connectionsApi.list(undefined, 'views').then(setAll).catch(() => setLoadFailed(true));
+  }, []);
+
+  const search = async (e) => {
+    e.preventDefault();
+    const term = q.trim();
+    if (!term) { setResults(null); return; }
+    setSearching(true);
+    try {
+      const page = await connectionsApi.search({ q: term, size: 12 });
+      setResults({ term, list: page.content });
+    } catch {
+      setResults({ term, list: [], failed: true });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const featured = shown ?? all?.[0];
+  const bill = results ? results.list : (all ?? []).slice(0, 8);
+
   return (
-    <Layout minimalNav>
-      <div className="container">
-        <section className="hero">
-          <div>
-            <p className="eyebrow eyebrow--light">Cinema e arti visive · Un archivio di relazioni</p>
-            <h1 className="hero__title">Le immagini<br />si parlano.</h1>
-            <p className="hero__text">
-              Un’inquadratura, un dipinto, una somiglianza inattesa. VisuArt raccoglie gli sguardi
-              che mettono in dialogo il cinema e le arti visive.
-            </p>
-            <Link to="/connessioni" className="btn btn--primary hero__cta">
-              <Icon name="arrowUpRight" /> Esplora le connessioni più viste
-            </Link>
-            <p className="hero__aside">Non cerchiamo certezze. Apriamo nuove letture.</p>
-          </div>
-
-          <div className="hero__pair" onMouseEnter={() => setReplay((n) => n + 1)}>
-            <div className="hero__circle">
-              <span className="motif__c"><img src={heroFilm} alt="In the Mood for Love" /></span>
-              <span key={replay} className={`hero__link ${replay ? 'hero__link--replay' : ''}`} />
-              <div className="hero__cap">
-                <p className="eyebrow eyebrow--light t-film">Film · 2000</p>
-                <h3>In the Mood for Love</h3>
-                <p>Wong Kar-wai</p>
-              </div>
-            </div>
-            <div className="hero__circle">
-              <span className="motif__c motif__c--art"><img src={heroArt} alt="Nighthawks" /></span>
-              <div className="hero__cap">
-                <p className="eyebrow eyebrow--light t-art">Opera d’arte · 1942</p>
-                <h3>Nighthawks</h3>
-                <p>Edward Hopper</p>
+    <Layout>
+      <div className="mq">
+        <section className="mq-facade" aria-labelledby="mq-title">
+          <h1 id="mq-title" className="sr-only">VisuArt: film e dipinti in cartellone insieme</h1>
+          <div className="mq-wrap">
+            <Marquee conn={featured} label={shown ? 'Anche in programma' : 'In cartellone'} />
+            <div className="mq-under">
+              <Showcase conn={featured} />
+              <div className="mq-booth">
+                <p className="mq-booth__lead">
+                  Ogni sera un film e un dipinto, accostati da chi li ha guardati insieme.
+                  Una critica firmata, i colori a confronto, la strada verso altre opere.
+                </p>
+                <form className="mq-search" role="search" onSubmit={search}>
+                  <label htmlFor="mq-q">Cerca in cartellone</label>
+                  <div className="mq-search__row">
+                    <input id="mq-q" type="search" value={q} onChange={(e) => setQ(e.target.value)}
+                      placeholder="Un film, un’opera, un regista, un pittore" autoComplete="off" />
+                    <button type="submit" disabled={searching}>
+                      <Icon name="search" /> {searching ? 'Cerco…' : 'Cerca'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="ways__head">
-          <h2 className="h-section">Tre modi di guardare</h2>
-          <p className="eyebrow eyebrow--light">L’archivio, da prospettive diverse</p>
-        </div>
-        <div className="ways">
-          {WAYS.map((w) => (
-            <Link key={w.to} to={w.to} className="way">
-              <img src={w.img} alt="" />
-              <span className="way__tag">{w.tag.toUpperCase()}</span>
-              <span className="way__num">{w.num}</span>
-              <div className="way__cap">
-                <h3>{w.title}</h3>
-                <p>{w.text}</p>
-                <span className="way__arrow"><Icon name="arrowUpRight" /></span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        <section className="mq-wrap mq-bill" aria-labelledby="mq-bill">
+          <div className="mq-bill__head">
+            <h2 id="mq-bill">{results ? `In cartellone per «${results.term}»` : 'Il programma'}</h2>
+            {results ? (
+              <button type="button" className="mq-link" onClick={() => { setResults(null); setQ(''); }}>
+                Torna al programma
+              </button>
+            ) : (
+              <Link to="/connessioni" className="mq-link">Tutte le connessioni <Icon name="arrowRight" /></Link>
+            )}
+          </div>
 
-        <section className="manifesto">
-          <h2>Una relazione è un invito a riguardare.</h2>
-          <p>
-            Ogni connessione nasce da una nota critica personale. Le affinità proposte non attestano
-            un’influenza storica: raccontano un modo di vedere.
-          </p>
+          {loadFailed && !results && (
+            <p className="mq-note" role="alert">Il programma non è arrivato. Ricarica la pagina tra poco.</p>
+          )}
+          {!all && !loadFailed && !results && <p className="mq-note">Montiamo le lettere…</p>}
+          {results?.failed && <p className="mq-note" role="alert">La ricerca non ha risposto. Riprova tra poco.</p>}
+          {results && !results.failed && results.list.length === 0 && (
+            <p className="mq-note">Nessuna connessione per «{results.term}». Prova con il titolo di un film o il nome di un pittore.</p>
+          )}
+
+          {bill.length > 0 && (
+            <ul className="mq-board" onMouseLeave={() => setShown(null)}>
+              {bill.map((c) => <BillRow key={c.id} conn={c} onShow={setShown} />)}
+            </ul>
+          )}
         </section>
+
+        <nav className="mq-wrap mq-doors" aria-label="Altri modi di guardare">
+          <Link to="/grafo" className="mq-door">
+            <span className="mq-door__t">Il grafo delle affinità</span>
+            <span className="mq-door__d">Segui il filo da un’opera all’altra.</span>
+          </Link>
+          <Link to="/collezione" className="mq-door">
+            <span className="mq-door__t">La tua collezione</span>
+            <span className="mq-door__d">Le coppie che vuoi rivedere.</span>
+          </Link>
+          <Link to="/nuova-critica" className="mq-door">
+            <span className="mq-door__t">Scrivi una connessione</span>
+            <span className="mq-door__d">Accosta un film e un dipinto, firma il tuo sguardo.</span>
+          </Link>
+        </nav>
+
+        <p className="mq-wrap mq-close">
+          Le affinità non attestano un’influenza storica: raccontano un modo di vedere.
+        </p>
       </div>
     </Layout>
   );

@@ -79,9 +79,12 @@ export default function ConnectionsPage() {
           </div>
         )}
         {status === 'ok' && list.length > 0 && (
-          <div className="cards-3">
-            {list.map((c) => <ConnectionCard key={c.id} conn={c} />)}
-          </div>
+          <section aria-labelledby="conn-list">
+            <h2 id="conn-list" className="sr-only">Elenco delle connessioni</h2>
+            <div className="cards-3">
+              {list.map((c) => <ConnectionCard key={c.id} conn={c} />)}
+            </div>
+          </section>
         )}
 
         {status === 'ok' && (

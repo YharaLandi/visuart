@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { artOf, filmOf, n, serial, splitNote } from '../lib/format';
-import { Motif, PaletteBars, TitlePair } from './ui/Visual';
+import { imgUrl } from '../api/client';
+import { PaletteBars, TitlePair } from './ui/Visual';
 
 /** Card connessione: categoria e numero, motivo, titoli, due palette, citazione, autore, numeri. */
 export default function ConnectionCard({ conn, selected = false }) {
@@ -33,7 +34,10 @@ export default function ConnectionCard({ conn, selected = false }) {
   return (
     <Link to={`/connessioni/${conn.id}`} className={`card conn-card ${selected ? 'conn-card--selected' : ''}`}>
       <p className="conn-card__num">{conn.category.toUpperCase()}&nbsp; / &nbsp;{serial(conn.id)}</p>
-      <div ref={motifRef} className={`conn-card__motif ${seen ? 'is-seen' : ''}`}><Motif film={film} art={art} size="md" /></div>
+      <div ref={motifRef} className={`conn-card__stills ${seen ? 'is-seen' : ''}`} aria-hidden="true">
+        <span className="conn-card__still conn-card__still--film">{imgUrl(film.imageUrl) && <img src={imgUrl(film.imageUrl)} alt="" loading="lazy" />}</span>
+        <span className="conn-card__still conn-card__still--art">{imgUrl(art.imageUrl) && <img src={imgUrl(art.imageUrl)} alt="" loading="lazy" />}</span>
+      </div>
       <TitlePair film={film} art={art} />
       <p className="conn-card__meta">
         {film.year ?? '—'} · {film.creator} / {art.year ?? '—'} · {art.creator}

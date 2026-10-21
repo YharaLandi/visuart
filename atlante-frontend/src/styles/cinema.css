@@ -1,0 +1,308 @@
+/* ==========================================================================
+   VisuArt · il cinema
+   La facciata del cinema estesa a tutta l'app: smalto nero di sera, lamiera
+   grigio-perla di giorno, titoli in lettere da insegna, luce delle lampadine
+   per l'azione principale. Si carica dopo visuart.css e ne ridefinisce i token.
+   ========================================================================== */
+
+:root {
+  --bg: #0c0c0e;
+  --surface-1: #141417;
+  --surface-2: #19191d;
+  --surface-3: #222227;
+  --line-1: #1f1f24;
+  --line-2: #2b2b31;
+  --line-3: #3e3e45;
+  --text-1: #ecebe6;
+  --text-2: #cfcec8;
+  --text-muted: #a9a8a1;
+  --film: #47c6b6;
+  --art: #f59a5b;
+  --film-ring: #47c6b6;
+  --art-ring: #f59a5b;
+  --film-soft: #47c6b61a;
+  --art-soft: #f59a5b1a;
+  --bulb: #ffd27a;
+  --on-bulb: #141414;
+  --nav-bg: #0c0c0ed9;
+  --edge: #3e3e45;
+  --grain-opacity: 0;
+  --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --font-sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-sans);
+  --font-logo: "Source Serif 4", Georgia, serif;
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-card: 4px;
+  --r-pill: 4px;
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--bulb);
+  --wall-lines: repeating-linear-gradient(90deg, transparent 0 119px, #ffffff06 119px 120px);
+}
+
+/* di giorno: il manifesto stampato del cinema. Carta grigio-chiara, inchiostro nero pieno,
+   la banda gialla del programma come campitura; l'insegna è spenta. */
+:root[data-theme="light"] {
+  --bg: #e9e9e4;
+  --surface-1: #f7f7f3;
+  --surface-2: #efefea;
+  --surface-3: #dcdcd5;
+  --line-1: #cfcfc8;
+  --line-2: #b4b4ac;
+  --line-3: #141414;
+  --text-1: #141414;
+  --text-2: #26262a;
+  --text-muted: #4a4a4f;
+  --film: #0b6359;
+  --art: #a8360a;
+  --film-ring: #0f7d72;
+  --art-ring: #c2410c;
+  --film-soft: #0f7d7214;
+  --art-soft: #c2410c14;
+  --bulb: #f2b13c;
+  --on-bulb: #141414;
+  --nav-bg: #f2b13c;
+  --edge: #141414;
+  --wall-lines: none;
+}
+
+body { background: var(--wall-lines), var(--bg); }
+::selection { background: var(--art-ring); color: #fff; }
+
+/* titoli: lettere da insegna */
+html :is(h1, h2, h3,
+.h-page, .h-section, .title-pair) {
+  font-style: normal;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.98;
+}
+.h-page, h1.title-pair { font-size: clamp(2.6rem, 1.6rem + 3.6vw, 4.6rem); }
+h3.title-pair { font-size: 1.5rem; line-height: 1.02; }
+.title-pair__arrow { transform: none; }
+.eyebrow { font-family: var(--font-display); font-size: 0.95rem; letter-spacing: 0.14em; }
+
+
+/* citazioni e lettura: testo pieno, senza corsivo da rivista */
+.conn-card__quote,
+.reading__quote,
+.graph-panel__quote,
+.chat__quote { font-style: normal; font-weight: 600; }
+
+/* azione principale: la luce delle lampadine */
+.btn { font-family: var(--font-display); font-size: 1.05rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.btn--primary { background: var(--bulb); color: var(--on-bulb); }
+.btn--primary:hover:not(:disabled) { box-shadow: 0 10px 24px -12px var(--bulb); }
+.btn--ghost { border-width: 2px; border-color: var(--text-1); }
+
+.chip { font-family: var(--font-display); font-size: 0.98rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.chip--active, .chip[aria-pressed="true"] { background: var(--text-1); color: var(--bg); border-color: var(--text-1); }
+
+/* card: targhe smaltate con un filo, non schede morbide */
+.card { box-shadow: 0 18px 30px -22px #000000b3; }
+:root[data-theme="light"] .card { box-shadow: 0 14px 26px -20px #14141640; }
+
+.nav { border-bottom: 1px solid var(--line-2); }
+.nav__link { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav__link--active { color: var(--bulb); }
+:root[data-theme="light"] .nav__link--active { color: var(--art); }
+
+:focus-visible { outline-color: var(--bulb); }
+input, textarea, select { caret-color: var(--bulb); }
+
+/* resti cromatici dell'avorio */
+:root[data-theme="light"] .tabbar { background: #d6d8d8f2; }
+:root[data-theme="light"] .gnode__title { background: #eceeede6; }
+.tabbar a { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.tabbar a.on { color: var(--bulb); }
+:root[data-theme="light"] .tabbar a.on { color: var(--art); }
+
+/* didascalie delle opere nel dettaglio: targhetta, non corsivo */
+.frame__title { font-family: var(--font-display); font-style: normal; font-weight: 800; text-transform: uppercase; font-size: 1.5rem; }
+
+/* chat: la colonna delle conversazioni resta nella sua larghezza */
+.chat__side { min-width: 0; }
+.chat__side > * { min-width: 0; max-width: 100%; }
+.conv { min-width: 0; }
+
+/* immagini intere: le opere non si tagliano, si incorniciano */
+.frame__img img,
+.coll-card__img img,
+.sheet__img img,
+.graph-panel__img img,
+.result__img img { object-fit: contain; background: #0c0c0e; }
+
+/* logo: i due cerchi restano, il nome diventa lettera da insegna */
+.brand__name {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.brand-mark i { width: 16px; height: 16px; border-width: 3px; }
+.brand-mark b { width: 8px; height: 3px; }
+/* collezione: bacheca orizzontale, i manifesti verticali restano interi al centro */
+.coll-card__img { aspect-ratio: 4 / 3; }
+.coll-card__img:after { display: none; }
+
+/* iniziale dell'avatar: tessera dell'insegna, non corsivo */
+.avatar { font-family: var(--font-display); font-style: normal; font-weight: 800; font-size: 1.2rem; }
+
+/* nel mondo dell'insegna non c'è corsivo: ogni resto del vecchio stile torna diritto */
+.comment-gate p, .dialogues__empty, .hero__title, .hero__aside, .hero__cap, .hero__cap h3,
+.way__num, .manifesto h2, .frame__cap .kind, .detail-frames__link, .color-card h2,
+.profile-card__bio, .shell__caption, .graph-panel h2, .auth__foot, .auth-foot { font-style: normal; }
+.color-card h2, .graph-panel h2 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; }
+
+/* ---------- correzioni dalla critica ---------- */
+
+/* mobile: "Scrivi" vive nella barra, niente pulsante flottante sopra i contenuti */
+.fab { display: none !important; }
+.tabbar { grid-template-columns: repeat(5, 1fr) !important; }
+.tabbar a { font-size: 0.78rem; }
+.tabbar a.tabbar__new .bi {
+  display: grid; place-items: center;
+  width: 40px; height: 30px; margin: 0 auto 2px;
+  background: var(--bulb); color: var(--on-bulb); border-radius: 4px;
+}
+.tabbar a.tabbar__new { color: var(--text-1); }
+
+/* impostazioni: la colonna non sborda, le schede scorrono dentro lo schermo */
+.settings-layout { grid-template-columns: 220px minmax(0, 1fr); }
+.settings-layout > * { min-width: 0; }
+@media (max-width: 760px) {
+  .settings-layout { grid-template-columns: minmax(0, 1fr); }
+  .settings-stack, .settings-section, .settings-section input, .settings-section textarea { max-width: 100%; min-width: 0; box-sizing: border-box; }
+}
+
+/* contatori: cifre leggibili, non la "I" condensata */
+.count, .bell__count { font-family: var(--font-sans); font-variant-numeric: tabular-nums; font-weight: 700; }
+.count { background: var(--bulb); color: var(--on-bulb); }
+
+/* grafo: etichette leggibili, comandi in alto a destra lontani dal suggerimento */
+.gnode__type { font-size: 0.6875rem; }
+.gnode__title { font-size: 0.875rem; }
+.graph__controls .chip { font-size: 0.95rem; }
+.graph__controls { top: var(--sp-4); bottom: auto; left: auto; right: var(--sp-4); }
+
+/* citazioni: niente parola orfana; testo di lettura a misura */
+.conn-card__quote, .reading__quote, .graph-panel__quote, .detail-pull, blockquote { text-wrap: pretty; }
+.reading__text, .reading p { max-width: 68ch; }
+
+/* pulsante disattivato: si legge che è spento, con contrasto sufficiente */
+.btn--primary:disabled { background: var(--surface-3); color: var(--text-muted); opacity: 1; }
+
+/* di giorno le righe della facciata non devono sembrare un errore di griglia */
+
+/* ---------- dettaglio: piccola insegna in testa, azioni del proprietario in fondo ---------- */
+.mq-sign--sm { margin: 8px 0 20px; padding: 22px; }
+.mq-sign--sm .mq-sign__panel { --tile-h: clamp(28px, 3.6vw, 52px); padding: 20px 16px; gap: 8px; }
+.mq-sign--sm .mq-line--small .mq-tile { --tile-h: clamp(18px, 2vw, 26px); }
+h1.mq-sign { margin-top: 8px; }
+.detail-head .detail-actions { justify-content: center; }
+.detail-head .detail-meta { text-align: center; }
+
+.detail-owner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line-2);
+}
+.detail-owner__label { margin-right: auto; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.btn--danger { background: transparent; border: 2px solid var(--danger); color: var(--danger); }
+.btn--danger:hover:not(:disabled) { background: var(--danger); color: var(--bg); }
+
+/* ---------- biglietteria: accesso, registrazione, nuova critica ---------- */
+.shell:before { display: none; }
+.shell__caption { font-style: normal; }
+.dialog {
+  position: relative;
+  border-radius: 4px;
+  border: 2px solid var(--line-3);
+  padding-top: 0;
+  /* le due tacche del biglietto all'altezza della perforazione */
+  -webkit-mask: radial-gradient(circle 12px at 0 64px, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 64px, #0000 98%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 12px at 0 64px, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 12px at 100% 64px, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+.dialog__top {
+  margin: 0 calc(var(--sp-6) * -1) var(--sp-6);
+  padding: 0 var(--sp-6);
+  height: 64px;
+  border-bottom: 2px dashed var(--line-3);
+  background: var(--bulb);
+  color: var(--on-bulb);
+}
+.dialog__ticket { font: 800 1.15rem/1 var(--font-display); letter-spacing: 0.12em; text-transform: uppercase; }
+.dialog__back {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px;
+  background: none; border: 0; color: var(--on-bulb); cursor: pointer;
+  font: 700 0.95rem/1 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase;
+  text-decoration: underline; text-underline-offset: 4px;
+}
+.dialog h1 { font-size: clamp(2.4rem, 2rem + 2vw, 3.4rem); }
+
+/* ---------- card delle connessioni: biglietto con le due bacheche ---------- */
+.conn-card { padding-top: 0; overflow: hidden; }
+.conn-card__num {
+  margin: 0 calc(var(--sp-5) * -1) var(--sp-4);
+  padding: 12px var(--sp-5);
+  border-bottom: 2px dashed var(--line-3);
+  background: var(--surface-3);
+  font: 700 0.95rem/1 var(--font-display);
+  letter-spacing: 0.14em;
+  color: var(--text-1);
+}
+.conn-card__stills { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: var(--sp-4); }
+.conn-card__still {
+  aspect-ratio: 4 / 3;
+  padding: 4px;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #4a4b50, #1c1c20 45%, #3a3b40);
+  overflow: hidden;
+}
+.conn-card__still img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1); }
+.conn-card:hover .conn-card__still img { transform: scale(1.05); }
+.conn-card__stills:not(.is-seen) .conn-card__still { opacity: 0; transform: translateY(6px); }
+.conn-card__stills.is-seen .conn-card__still { opacity: 1; transform: none; transition: opacity 400ms ease-out, transform 500ms cubic-bezier(0.16, 1, 0.3, 1); }
+.conn-card__stills.is-seen .conn-card__still--art { transition-delay: 90ms; }
+@media (prefers-reduced-motion: reduce) { .conn-card__stills .conn-card__still { opacity: 1; transform: none; transition: none; } }
+
+/* ---------- manifesto di giorno ---------- */
+:root[data-theme="light"] .nav { background: var(--bulb); border-bottom: 3px solid #141414; }
+:root[data-theme="light"] .nav__link--active { color: #141414; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+:root[data-theme="light"] .nav .btn--primary { background: #141414; color: var(--bulb); }
+:root[data-theme="light"] .btn--primary { background: #141414; color: var(--bulb); }
+:root[data-theme="light"] .btn--primary:disabled { background: var(--surface-3); color: var(--text-muted); }
+:root[data-theme="light"] .card { box-shadow: none; border: 2px solid #141414; }
+:root[data-theme="light"] .conn-card__num { background: #141414; color: var(--bulb); border-bottom-color: #141414; }
+:root[data-theme="light"] .tabbar { background: var(--bulb); border-top: 3px solid #141414; }
+:root[data-theme="light"] .tabbar a, :root[data-theme="light"] .tabbar a.on { color: #141414; }
+:root[data-theme="light"] .tabbar a.tabbar__new .bi { background: #141414; color: var(--bulb); }
+:root[data-theme="light"] .dialog__top { background: #141414; color: var(--bulb); }
+:root[data-theme="light"] .dialog__back { color: var(--bulb); }
+:root[data-theme="light"] .footer { border-top: 3px solid #141414; }
+
+/* l'insegna di giorno è spenta: lampadine opache, nessun bagliore */
+:root[data-theme="light"] .mq-sign::before,
+:root[data-theme="light"] .mq-sign::after { animation: none; filter: none; opacity: 0.55; }
+:root[data-theme="light"] .mq-sign { --mq-bulb: #d9d3c2; box-shadow: 0 18px 30px -22px #14141466; }
+:root[data-theme="light"] .mq-sign__panel { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2); }
+:root[data-theme="light"] .mq-search button { background: #141414; color: var(--bulb); }
+
+/* ---------- foto profilo ---------- */
+.avatar { overflow: hidden; }
+.avatar--photo { padding: 0; background: var(--surface-3); }
+.avatar--photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-btn { padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.avatar-btn:focus-visible { outline: 3px solid var(--bulb); outline-offset: 2px; }
+.avatar-upload { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap; margin-bottom: var(--sp-5); }
+.avatar-upload__actions { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.avatar-upload__hint { width: 100%; color: var(--text-muted); font-size: 0.875rem; margin: 0; }
+
+/* la barra resta piena mentre si scorre: il testo non le passa sotto */
+.nav { background: var(--nav-bg); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+:root[data-theme="light"] .nav { background: var(--bulb); }

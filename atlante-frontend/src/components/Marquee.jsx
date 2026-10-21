@@ -1,0 +1,57 @@
+import { filmOf, artOf } from '../lib/format';
+import '../styles/marquee.css';
+
+/** Una parola composta in tessere, come le lettere mobili dell'insegna. */
+function TileWord({ word, tone, offset }) {
+  return (
+    <span className="mq-word">
+      {[...word].map((ch, i) => (
+        <span key={i} className={`mq-tile mq-tile--${tone}`} style={{ '--i': offset + i }}>{ch}</span>
+      ))}
+    </span>
+  );
+}
+
+/** Una riga dell'insegna: il testo resta leggibile per gli screen reader, le tessere sono decorative. */
+export function SignLine({ text, tone, start = 0, small = false }) {
+  let offset = start;
+  const words = text.toUpperCase().split(/\s+/).filter(Boolean);
+  return (
+    <span className={`mq-line ${small ? 'mq-line--small' : ''}`}>
+      <span className="sr-only">{text}</span>
+      <span className="mq-line__tiles" aria-hidden="true">
+        {words.map((w, i) => {
+          const el = <TileWord key={i} word={w} tone={tone} offset={offset} />;
+          offset += w.length;
+          return el;
+        })}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * L'insegna a lettere mobili: in cartellone un film CON un dipinto.
+ * size="sm" è la versione in testa a ogni connessione.
+ */
+export default function Marquee({ conn, label, size = 'lg', as: Tag = 'div' }) {
+  const film = conn ? filmOf(conn) : null;
+  const art = conn ? artOf(conn) : null;
+  const filmLen = film?.title.length ?? 0;
+  return (
+    <Tag className={`mq-sign ${size === 'sm' ? 'mq-sign--sm' : ''}`}>
+      <span className="mq-sign__panel" key={conn?.id ?? 'empty'}>
+        <SignLine text={label} tone="ink" small />
+        {conn ? (
+          <>
+            <SignLine text={film.title} tone="film" start={4} />
+            <SignLine text="con" tone="ink" start={4 + filmLen} small />
+            <SignLine text={art.title} tone="art" start={8 + filmLen} />
+          </>
+        ) : (
+          <SignLine text="Il programma arriva" tone="ink" start={4} />
+        )}
+      </span>
+    </Tag>
+  );
+}

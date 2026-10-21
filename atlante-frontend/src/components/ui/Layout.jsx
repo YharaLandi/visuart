@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { notifications as notificationsApi, users as usersApi } from '../../api/client';
 import { connectNotifications } from '../../api/stomp';
@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ROLE_LABEL, timeAgo } from '../../lib/format';
 import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
-import { Brand, Footer } from './Visual';
+import { Avatar, Brand, Footer } from './Visual';
 
 const LINKS = [
   ['/connessioni', 'Più viste', 'compass', 'Più viste'],
@@ -44,8 +44,8 @@ function AvatarMenu() {
 
   return (
     <div className="menu-wrap" ref={ref}>
-      <button className="avatar" onClick={() => setOpen((v) => !v)} aria-label="Menu account" aria-expanded={open}>
-        {user.displayName?.[0]?.toUpperCase() ?? '?'}
+      <button className="avatar-btn" onClick={() => setOpen((v) => !v)} aria-label="Menu account" aria-expanded={open}>
+        <Avatar name={user.displayName} username={user.username} has={user.hasAvatar} version={user.avatarVersion} />
       </button>
       {open && (
         <div className="menu" role="menu">
@@ -206,7 +206,8 @@ export function NavBar({ minimal = false }) {
           </nav>
         )}
         <div className="nav__actions">
-          {!minimal && (
+          {/* in home la ricerca è già nella biglietteria, sotto l'insegna */}
+          {!minimal && location.pathname !== '/' && (
             <button className="icon-btn" onClick={() => navigate('/cerca')} aria-label="Cerca negli archivi">
               <Icon name="search" />
             </button>
@@ -231,17 +232,23 @@ export function NavBar({ minimal = false }) {
 
 function TabBar() {
   return (
-    <>
-      <Link to="/nuova-critica" className="btn btn--primary fab"><Icon name="plus" /> Nuova critica</Link>
-      <nav className="tabbar" aria-label="Sezioni">
-        {LINKS.map(([to, , icon, short]) => (
-          <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'on' : '')}>
+    <nav className="tabbar" aria-label="Sezioni">
+      {LINKS.map(([to, , icon, short], i) => (
+        <Fragment key={to}>
+          {/* l'azione principale sta al centro della barra: non copre più i contenuti */}
+          {i === 2 && (
+            <NavLink to="/nuova-critica" className={({ isActive }) => `tabbar__new ${isActive ? 'on' : ''}`}>
+              <Icon name="plus" />
+              Scrivi
+            </NavLink>
+          )}
+          <NavLink to={to} className={({ isActive }) => (isActive ? 'on' : '')}>
             <Icon name={icon} />
             {short}
           </NavLink>
-        ))}
-      </nav>
-    </>
+        </Fragment>
+      ))}
+    </nav>
   );
 }
 

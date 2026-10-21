@@ -12,6 +12,8 @@ function toUser(data) {
     role: data.role,
     bio: data.bio ?? null,
     createdAt: data.createdAt ?? null,
+    hasAvatar: data.hasAvatar ?? false,
+    avatarVersion: data.avatarVersion ?? null,
   };
 }
 

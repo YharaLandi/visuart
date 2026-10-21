@@ -30,7 +30,7 @@ export default function ProfilePage() {
 
         <div className="profile">
           <section className="card profile-card">
-            <Avatar name={user.displayName} size="lg" />
+            <Avatar name={user.displayName} username={user.username} has={user.hasAvatar} version={user.avatarVersion} size="lg" />
             <h2>{user.displayName}</h2>
             <p className="profile-card__email">{user.email}</p>
             <span className="badge">{ROLE_LABEL[user.role] ?? user.role}</span>

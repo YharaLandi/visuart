@@ -131,10 +131,10 @@ export default function NewCritiquePage() {
     <Shell rightText="L’archivio delle connessioni" caption="La connessione sarà pubblica. Puoi modificarla dal tuo profilo.">
       <form className="dialog dialog--wide critique" onSubmit={submit}>
         <div className="dialog__top">
-          <span className="eyebrow eyebrow--light">{editing ? 'Rivedi il tuo sguardo' : 'Un nuovo sguardo'}</span>
-          <button type="button" className="dialog__close" onClick={() => navigate(-1)} aria-label="Chiudi"><Icon name="close" /></button>
+          <span className="dialog__ticket">{editing ? 'Rivedi il tuo sguardo' : 'Un nuovo sguardo'}</span>
+          <button type="button" className="dialog__back" onClick={() => navigate(-1)}><Icon name="arrowLeft" /> Indietro</button>
         </div>
-        <h1 style={{ marginTop: 34 }}>{editing ? 'Modifica critica' : 'Nuova critica'}</h1>
+        <h1>{editing ? 'Modifica critica' : 'Nuova critica'}</h1>
         <p className="dialog__intro">
           Accosta due opere e racconta la tua interpretazione. Non serve dimostrare un’influenza: serve uno sguardo.
         </p>

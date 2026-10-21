@@ -28,6 +28,8 @@ export function imgUrl(path) {
 
 async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
+  // un FormData porta il suo boundary: il browser deve impostare da sé il Content-Type
+  if (options.body instanceof FormData) delete headers['Content-Type'];
   const token = getToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -114,7 +116,18 @@ export const account = {
   stats: () => api.get('/api/users/me/stats'),
   emailStats: () => api.post('/api/users/me/stats/email'),
   remove: (password) => api.delete('/api/users/me', { password }),
+  uploadAvatar: (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return request('/api/users/me/avatar', { method: 'POST', body: form });
+  },
+  removeAvatar: () => api.delete('/api/users/me/avatar'),
 };
+
+/** Foto profilo pubblica; v cambia dopo un caricamento per superare la cache del browser. */
+export function avatarUrl(username, v) {
+  return `${BASE_URL}/api/users/${encodeURIComponent(username)}/avatar${v ? `?v=${v}` : ''}`;
+}
 
 export const users = {
   search: (q) => api.get(`/api/users/search?q=${encodeURIComponent(q)}`),

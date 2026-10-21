@@ -282,7 +282,7 @@ export default function ChatPage() {
                 className={`conv ${c.counterpart === withParam ? 'conv--active' : ''}`}
                 onClick={() => navigate(`/chat/${c.counterpart}`)}
               >
-                <Avatar name={c.counterpartName ?? c.counterpart} size="sm" />
+                <Avatar name={c.counterpartName ?? c.counterpart} username={c.counterpart} size="sm" />
                 <div className="conv__body">
                   <div className="conv__row"><strong>{c.counterpartName ?? c.counterpart}</strong><small>{shortWhen(c.lastAt)}</small></div>
                   <p className="conv__last">{c.lastText === '' ? 'Connessione condivisa' : (c.lastText ?? 'Nessun messaggio')}</p>
@@ -304,7 +304,7 @@ export default function ChatPage() {
               <div className="conv-list">
                 {newPeople.map((p) => (
                   <button key={p.username} className="conv" onClick={() => { setFilter(''); navigate(`/chat/${p.username}`); }}>
-                    <Avatar name={p.displayName} size="sm" />
+                    <Avatar name={p.displayName} username={p.username} size="sm" />
                     <div className="conv__body">
                       <div className="conv__row"><strong>{p.displayName}</strong></div>
                       <p className="conv__last">@{p.username} · Inizia un dialogo</p>
@@ -314,7 +314,6 @@ export default function ChatPage() {
               </div>
             </>
           )}
-          <p className="chat__quote">Un dialogo può cambiare il modo in cui guardi.</p>
         </aside>
 
         <section className="thread" aria-label="Conversazione">
@@ -329,7 +328,7 @@ export default function ChatPage() {
                 <button className="icon-btn thread__back" onClick={() => navigate('/chat')} aria-label="Torna alle conversazioni">
                   <Icon name="arrowLeft" />
                 </button>
-                <Avatar name={activeName} size="sm" />
+                <Avatar name={activeName} username={withParam} size="sm" />
                 <div>
                   <strong><Link to={`/utenti/${withParam}`} className="author-link">{activeName}</Link></strong>
                   <small className={active?.online ? 'on' : ''}>
@@ -362,7 +361,7 @@ export default function ChatPage() {
 
               {typing && (
                 <p className="typing">
-                  <Avatar name={activeName} size="xs" />{' '}
+                  <Avatar name={activeName} username={withParam} size="xs" />{' '}
                   <span className="typing__dots" aria-hidden="true"><i /><i /><i /></span>{' '}
                   {activeName.split(' ')[0]} sta scrivendo
                 </p>

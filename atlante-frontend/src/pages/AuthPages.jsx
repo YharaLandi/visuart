@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { auth as authApi } from '../api/client';
 import Icon from '../components/ui/Icon';
 import { Shell } from '../components/ui/Layout';
-import { Motif } from '../components/ui/Visual';
 import { useAuth } from '../context/AuthContext';
 
 const CAPTION = 'VisuArt · Uno spazio per guardare, non per scorrere.';
@@ -19,10 +18,9 @@ function Dialog({ title, intro, children, onClose }) {
   return (
     <section className="dialog" aria-labelledby="dialog-title">
       <div className="dialog__top">
-        <span className="eyebrow eyebrow--light">Il tuo spazio VisuArt</span>
-        <button className="dialog__close" onClick={onClose} aria-label="Chiudi"><Icon name="close" /></button>
+        <span className="dialog__ticket">Biglietteria VisuArt</span>
+        <button type="button" className="dialog__back" onClick={onClose}><Icon name="arrowLeft" /> Torna all’archivio</button>
       </div>
-      <div className="dialog__motif"><Motif size="xs" /></div>
       <h1 id="dialog-title">{title}</h1>
       <p className="dialog__intro">{intro}</p>
       {children}
@@ -74,7 +72,7 @@ export function LoginPage() {
         onClose={() => navigate('/')}
       >
         <form className="dialog__form" onSubmit={submit}>
-          <Field label="Email" type="text" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" placeholder="email o username" autoFocus />
+          <Field label="Email o username" type="text" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="username" placeholder="elena oppure elena@esempio.it" autoFocus />
           <Field label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           <div className="dialog__row">
             <label className="check"><input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} /> Ricordami</label>

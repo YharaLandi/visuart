@@ -4,23 +4,27 @@ import { connections as connectionsApi, imgUrl, likes as likesApi } from '../api
 import AiReading from '../components/AiReading';
 import Dialogues from '../components/Dialogues';
 import Icon from '../components/ui/Icon';
+import Marquee from '../components/Marquee';
 import Layout from '../components/ui/Layout';
 import { ErrorState, Loading } from '../components/ui/States';
 import { Avatar, Motif, PaletteBars, TitlePair } from '../components/ui/Visual';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { artOf, decade, filmOf, longDate, n, readingMinutes, ROLE_LABEL, sourceLabel, splitNote } from '../lib/format';
+import { artOf, decade, filmOf, longDate, n, readingMinutes, sourceLabel, splitNote } from '../lib/format';
 
 function Frame({ work, kind }) {
   const src = imgUrl(work.imageUrl);
+  const [broken, setBroken] = useState(false);
   const isFilm = kind === 'film';
   return (
     <figure>
-      <div className="frame__img">{src && <img src={src} alt={work.title} />}</div>
+      <div className="frame__img">
+        {src && !broken && <img src={src} alt={`${isFilm ? 'Fotogramma da' : 'Riproduzione di'} ${work.title}`} onError={() => setBroken(true)} />}
+      </div>
       <figcaption className="frame__cap">
         <span className={`kind ${isFilm ? 't-film' : 't-art'}`}>{isFilm ? 'Film' : 'Opera d’arte'}</span>
         <div>
-          <h3>{work.title}</h3>
+          <p className="frame__title">{work.title}</p>
           <p>{work.creator}{work.year ? ` · ${work.year}` : ''}</p>
           <p>{isFilm ? 'Lungometraggio' : 'Pittura'} · {sourceLabel(work)}</p>
         </div>
@@ -29,18 +33,18 @@ function Frame({ work, kind }) {
   );
 }
 
-/** Barra in alto che segue la lettura della critica. */
+/** Barra in alto che segue la lettura della critica (solo citazione e testo). */
 function ReadProgress() {
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     let frame = 0;
     const measure = () => {
       frame = 0;
-      const article = document.querySelector('.detail-body > article');
-      if (!article) return;
-      const rect = article.getBoundingClientRect();
-      const span = rect.height - window.innerHeight * 0.6;
-      setProgress(Math.min(1, Math.max(0, (window.innerHeight * 0.4 - rect.top) / Math.max(span, 1))));
+      const reading = document.querySelector('.reading');
+      if (!reading) return;
+      const rect = reading.getBoundingClientRect();
+      const span = rect.height + window.innerHeight * 0.2;
+      setProgress(Math.min(1, Math.max(0, (window.innerHeight * 0.8 - rect.top) / Math.max(span, 1))));
     };
     const onScroll = () => { frame ||= requestAnimationFrame(measure); };
     measure();
@@ -53,31 +57,48 @@ function ReadProgress() {
     };
   }, []);
   return (
-    <div className="read-progress" role="progressbar" aria-label="Avanzamento lettura"
-      aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+    <div className="read-progress" aria-hidden="true">
       <span style={{ transform: `scaleX(${progress})` }} />
     </div>
   );
 }
 
-/** Altre connessioni da leggere, escluse quella aperta. */
-function Related({ currentId }) {
+/** Perché una connessione è vicina a quella aperta: opera in comune, stesso autore, stessa categoria. */
+function affinity(current, other) {
+  const film = filmOf(current);
+  const art = artOf(current);
+  if (filmOf(other).id === film.id) return { score: 3, reason: `Stesso film · ${film.title}` };
+  if (artOf(other).id === art.id) return { score: 3, reason: `Stessa opera · ${art.title}` };
+  if (current.authorUsername && other.authorUsername === current.authorUsername) {
+    return { score: 2, reason: `Anche di ${other.authorName ?? other.authorUsername}` };
+  }
+  if (other.category === current.category) return { score: 1, reason: `Stessa categoria · ${other.category}` };
+  return { score: 0, reason: 'Tra le più lette' };
+}
+
+/** Connessioni vicine a quella aperta, con il motivo dichiarato su ogni card. */
+function Related({ current }) {
   const [list, setList] = useState([]);
   useEffect(() => {
-    connectionsApi.search({ sort: 'views', size: 3 })
-      .then((d) => setList(d.content.filter((c) => c.id !== currentId).slice(0, 2)))
+    connectionsApi.list(undefined, 'views')
+      .then((all) => setList(
+        all.filter((c) => c.id !== current.id)
+          .map((c) => ({ c, ...affinity(current, c) }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 2),
+      ))
       .catch(() => setList([]));
-  }, [currentId]);
+  }, [current]);
   if (list.length === 0) return null;
   return (
     <section className="related">
-      <h2 className="h-section">Altri modi di abitare un’immagine</h2>
+      <h2 className="h-section">Da qui si prosegue</h2>
       <div className="related__grid">
-        {list.map((c) => (
+        {list.map(({ c, reason }) => (
           <Link key={c.id} to={`/connessioni/${c.id}`} className="related-card">
             <Motif film={filmOf(c)} art={artOf(c)} size="sm" />
             <div>
-              <small>{c.category} · #{String(c.id).padStart(3, '0')}</small>
+              <small>{reason}</small>
               <TitlePair film={filmOf(c)} art={artOf(c)} />
               <span className="link">Leggi la connessione <Icon name="arrowUpRight" size={11} /></span>
             </div>
@@ -88,6 +109,19 @@ function Related({ currentId }) {
   );
 }
 
+/** Opere aggiunte alla collezione da questa pagina, per toglierle senza toccare quelle salvate altrove. */
+const SAVED_KEY = 'visuart_saved_via';
+function savedVia(connId) {
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY) ?? '{}')[connId] ?? []; } catch { return []; }
+}
+function setSavedVia(connId, ids) {
+  try {
+    const all = JSON.parse(localStorage.getItem(SAVED_KEY) ?? '{}');
+    if (ids.length) all[connId] = ids; else delete all[connId];
+    localStorage.setItem(SAVED_KEY, JSON.stringify(all));
+  } catch { /* preferenza locale, non essenziale */ }
+}
+
 export default function ConnectionDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -96,7 +130,8 @@ export default function ConnectionDetailPage() {
   const [conn, setConn] = useState(null);
   const [status, setStatus] = useState('loading');
   const [like, setLike] = useState({ likeCount: 0, likedByMe: false });
-  const [commentCount, setCommentCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(null);
+  const [actionError, setActionError] = useState(null);
 
   const load = useCallback(() => {
     setStatus('loading');
@@ -121,6 +156,8 @@ export default function ConnectionDetailPage() {
     try {
       if (like.likedByMe) await likesApi.remove(id);
       else await likesApi.add(id);
+    } catch {
+      setActionError('Il mi piace non è stato registrato. Riprova.');
     } finally {
       likesApi.get(id).then(setLike).catch(() => {});
     }
@@ -133,7 +170,7 @@ export default function ConnectionDetailPage() {
       <Layout>
         <div className="container state">
           <h3>Questa connessione non è più nell’archivio.</h3>
-          <p>Forse è stata rimossa dalla sua autrice.</p>
+          <p>Forse è stata rimossa da chi l’ha scritta.</p>
           <Link to="/connessioni" className="btn btn--ghost btn--sm">Tutte le connessioni</Link>
         </div>
       </Layout>
@@ -143,25 +180,38 @@ export default function ConnectionDetailPage() {
   const film = filmOf(conn);
   const art = artOf(conn);
   const bothSaved = favIds.has(film.id) && favIds.has(art.id);
-  const toggleFav = async () => {
+  const toggleSave = async () => {
     if (!user) return requireLogin();
-    if (bothSaved) {
-      await toggleFavorite(film.id);
-      await toggleFavorite(art.id);
-    } else {
-      if (!favIds.has(film.id)) await toggleFavorite(film.id);
-      if (!favIds.has(art.id)) await toggleFavorite(art.id);
+    setActionError(null);
+    try {
+      if (bothSaved) {
+        // togli solo ciò che questo bottone ha aggiunto; se non risulta nulla, entrambe
+        const tracked = savedVia(conn.id).filter((w) => favIds.has(w));
+        for (const w of (tracked.length ? tracked : [film.id, art.id])) await toggleFavorite(w);
+        setSavedVia(conn.id, []);
+      } else {
+        const added = [film.id, art.id].filter((w) => !favIds.has(w));
+        for (const w of added) await toggleFavorite(w);
+        setSavedVia(conn.id, added);
+      }
+    } catch {
+      setActionError('La collezione non è stata aggiornata. Riprova.');
     }
   };
 
   const { quote, body } = splitNote(conn.criticalNote);
   const author = conn.authorName ?? 'Archivio VisuArt';
-  const periods = [decade(art.year), decade(film.year)].filter(Boolean).join(' / ');
+  const words = conn.criticalNote?.trim().split(/\s+/).length ?? 0;
+  const periods = [decade(film.year), decade(art.year)].filter(Boolean).join(' / ');
   const isMine = user && conn.authorUsername === user.username;
   const removeConnection = async () => {
     if (!window.confirm('Eliminare questa critica? Spariscono anche i suoi mi piace e commenti.')) return;
-    await connectionsApi.remove(conn.id);
-    navigate('/connessioni');
+    try {
+      await connectionsApi.remove(conn.id);
+      navigate('/connessioni');
+    } catch {
+      setActionError('La critica non è stata eliminata. Riprova.');
+    }
   };
 
   return (
@@ -171,81 +221,89 @@ export default function ConnectionDetailPage() {
         <Link to="/connessioni" className="back"><Icon name="arrowLeft" /> Tutte le connessioni</Link>
 
         <header className="detail-head">
-          <div className="page-head__row">
-            <p className="eyebrow eyebrow--light">Connessione #{String(conn.id).padStart(3, '0')}</p>
-            <span className="small" style={{ color: 'var(--text)', fontWeight: 600 }}>{conn.category}</span>
-          </div>
-          <TitlePair film={film} art={art} as="h1" />
+          <Marquee conn={conn} size="sm" as="h1"
+            label={`Connessione n. ${String(conn.id).padStart(3, '0')} · ${conn.category}`} />
           <div className="detail-actions">
             <button className={`btn btn--ghost btn--sm ${like.likedByMe ? 'btn--active' : ''}`} onClick={toggleLike} aria-pressed={like.likedByMe}>
-              <Icon name="thumb" /> Mi piace · {n(like.likeCount)}
+              <Icon name={like.likedByMe ? 'thumbFill' : 'thumb'} /> Mi piace · {n(like.likeCount)}
             </button>
-            <button className={`btn btn--ghost btn--sm ${bothSaved ? 'btn--fav-active' : ''}`} onClick={toggleFav} aria-pressed={bothSaved}>
-              <Icon name="heart" /> {bothSaved ? 'Nei preferiti' : 'Aggiungi ai preferiti'}
+            <button className={`btn btn--ghost btn--sm ${bothSaved ? 'btn--active' : ''}`} onClick={toggleSave} aria-pressed={bothSaved}>
+              <Icon name={bothSaved ? 'bookmarkFill' : 'bookmark'} /> {bothSaved ? 'Nella tua collezione' : 'Salva film e opera'}
             </button>
           </div>
-          <p className="detail-meta">{n(conn.viewCount)} visualizzazioni · {readingMinutes(conn.criticalNote)} min di lettura</p>
-          {(isMine || user?.role === 'ADMIN') && (
-            <div className="detail-owner">
-              <Link to={`/connessioni/${conn.id}/modifica`} className="link"><Icon name="pencil" /> {isMine ? 'Modifica la tua critica' : 'Modifica (admin)'}</Link>
-              <button className="link-muted" onClick={removeConnection}><Icon name="trash" /> Elimina</button>
-            </div>
-          )}
+          {actionError && <p className="form-error" role="alert">{actionError}</p>}
+          <p className="detail-meta">
+            {n(conn.viewCount)} visualizzazioni · {words < 150 ? 'lettura breve' : `${readingMinutes(conn.criticalNote)} min di lettura`}
+          </p>
         </header>
 
         <div className="detail-frames">
           <Frame work={film} kind="film" />
+          <span className="detail-frames__link" aria-hidden="true" />
           <Frame work={art} kind="art" />
         </div>
 
         <div className="detail-body">
-          <article>
+          <article className="detail-critique">
             <p className="eyebrow eyebrow--light t-film">Lo sguardo di {author}</p>
-            <p className="reading__quote">«{quote}»</p>
-            {body.length > 0 && (
-              <div className="reading__text">{body.map((p, i) => <p key={i}>{p}</p>)}</div>
-            )}
+            <div className="reading">
+              <p className="reading__quote">«{quote}»</p>
+              {body.length > 0 && (
+                <div className="reading__text">{body.map((p, i) => <p key={i}>{p}</p>)}</div>
+              )}
+            </div>
             <p className="reading__disclaimer">
-              Interpretazione personale dell’autrice. L’accostamento non implica un’influenza storica documentata.
+              Interpretazione personale di {author}. L’accostamento non implica un’influenza storica documentata.
             </p>
             <div className="author-row">
-              <Avatar name={author} size="sm" />
+              <Avatar name={author} username={conn.authorUsername} size="sm" />
               <div>
                 <strong>{conn.authorUsername ? <Link to={`/utenti/${conn.authorUsername}`} className="author-link">{author}</Link> : author}</strong>
-                <small>{ROLE_LABEL[conn.authorRole] ?? 'Curatore'} · Pubblicato il {longDate(conn.createdAt)}</small>
+                <small>{conn.authorRole === 'CURATOR' ? 'Curatore · ' : ''}Pubblicata il {longDate(conn.createdAt)}</small>
               </div>
               {conn.authorUsername && !isMine && (
                 <Link
                   className="link"
                   to={user ? `/chat/${conn.authorUsername}?condividi=${conn.id}` : `/accedi?next=${encodeURIComponent(`/chat/${conn.authorUsername}`)}`}
                 >
-                  Scrivi all’autore
+                  Scrivi a {author}
                 </Link>
               )}
             </div>
-
-            <AiReading connectionId={conn.id} film={film} art={art} />
-            <Dialogues connectionId={conn.id} onCountChange={setCommentCount} />
+            {/* le azioni del proprietario stanno in fondo alla critica, lontane da mi piace e salva */}
+            {(isMine || user?.role === 'ADMIN') && (
+              <div className="detail-owner">
+                <p className="detail-owner__label">{isMine ? 'La tua critica' : 'Amministrazione'}</p>
+                <Link to={`/connessioni/${conn.id}/modifica`} className="btn btn--ghost btn--sm"><Icon name="pencil" /> Modifica</Link>
+                <button type="button" className="btn btn--danger btn--sm" onClick={removeConnection}><Icon name="trash" /> Elimina</button>
+              </div>
+            )}
           </article>
 
           <aside className="card color-card">
             <h2>La materia del colore</h2>
-            <p className="color-card__intro">Sei campioni estratti da ciascuna immagine.</p>
+            <p className="color-card__intro">I colori dominanti di ciascuna immagine, da copiare o scaricare.</p>
             <PaletteBars palette={film.palette} label="Film" tone="film" title={film.title} large showHex />
             <PaletteBars palette={art.palette} label="Opera d’arte" tone="art" title={art.title} large showHex />
             <div className="color-card__facts">
-              <div className="fact"><span>Categoria</span><strong>{conn.category}</strong></div>
               {periods && <div className="fact"><span>Periodi</span><strong>{periods}</strong></div>}
-              <div className="fact"><span>Linguaggi</span><strong>Cinema / Pittura</strong></div>
-              <div className="fact"><span>Dialoghi</span><strong>{n(commentCount)} commenti</strong></div>
+              <div className="fact">
+                <span>Dialoghi</span>
+                <strong>{commentCount === null ? '—' : <a href="#dialoghi" className="author-link">{n(commentCount)} commenti</a>}</strong>
+              </div>
               <Link to={`/grafo?opera=${film.id}`} className="btn btn--ghost btn--sm" style={{ alignSelf: 'flex-start' }}>
-                <Icon name="graph" /> Apri nel grafo
+                <Icon name="graph" /> Opere vicine nel grafo
               </Link>
             </div>
           </aside>
+
+          <div className="detail-after">
+            <AiReading connectionId={conn.id} film={film} art={art} />
+            <Dialogues connectionId={conn.id} onCountChange={setCommentCount} />
+          </div>
         </div>
 
-        <Related currentId={conn.id} />
+        <Related current={conn} />
       </div>
     </Layout>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { account as accountApi } from '../api/client';
 import Icon from '../components/ui/Icon';
 import Layout from '../components/ui/Layout';
+import { Avatar } from '../components/ui/Visual';
 import { useAuth } from '../context/AuthContext';
 import { getTheme, setTheme } from '../lib/theme';
 
@@ -57,6 +58,23 @@ export default function SettingsPage() {
     }, 'Profilo aggiornato');
   };
 
+  const applyAvatar = (me) => saveUser({ ...user, hasAvatar: me.hasAvatar, avatarVersion: Date.now() });
+
+  const uploadAvatar = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setMsg((m) => ({ ...m, avatar: { ok: false, text: 'La foto supera i 2 MB: scegline una più leggera.' } }));
+      return;
+    }
+    run('avatar', async () => applyAvatar(await accountApi.uploadAvatar(file)), 'Foto aggiornata');
+  };
+
+  const removeAvatar = () => {
+    run('avatar', async () => applyAvatar(await accountApi.removeAvatar()), 'Foto rimossa: torna la tua iniziale');
+  };
+
   const changePassword = (e) => {
     e.preventDefault();
     if (!PASSWORD_RULE.test(pwd.next)) {
@@ -98,7 +116,23 @@ export default function SettingsPage() {
           </nav>
 
           <div className="settings-stack">
-            <Section id="profilo" icon="user" title="Profilo" intro="Nome e frase compaiono sulle tue critiche e nella tua scheda.">
+            <Section id="profilo" icon="user" title="Profilo" intro="Foto, nome e frase compaiono sulle tue critiche, nei dialoghi e nella tua scheda.">
+              <div className="avatar-upload">
+                <Avatar name={user.displayName} username={user.username} has={user.hasAvatar} version={user.avatarVersion} size="lg" />
+                <div className="avatar-upload__actions">
+                  <label className="btn btn--ghost btn--sm">
+                    <Icon name="upload" /> {user.hasAvatar ? 'Cambia foto' : 'Carica una foto'}
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={uploadAvatar} disabled={busy === 'avatar'} />
+                  </label>
+                  {user.hasAvatar && (
+                    <button type="button" className="btn btn--ghost btn--sm" onClick={removeAvatar} disabled={busy === 'avatar'}>
+                      <Icon name="trash" /> Rimuovi
+                    </button>
+                  )}
+                </div>
+                <p className="avatar-upload__hint">JPG, PNG o WebP fino a 2 MB. Senza foto resta la tua iniziale.</p>
+                {feedback('avatar')}
+              </div>
               <form onSubmit={saveProfile} className="settings-form">
                 <label className="field">
                   <span className="field__label">Nome e cognome</span>

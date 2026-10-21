@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { imgUrl } from '../../api/client';
+import { avatarUrl, imgUrl } from '../../api/client';
 import Icon from './Icon';
 import { downloadPaletteCard } from '../../lib/paletteCard';
 
@@ -87,13 +87,30 @@ export function TitlePair({ film, art, as: Tag = 'h3', className = '' }) {
   return (
     <Tag className={`title-pair ${className}`}>
       <span className="title-pair__film">{film?.title}</span>
-      <span className="title-pair__art"><span className="title-pair__arrow"><Icon name="arrowsLR" /></span>{art?.title}</span>
+      <span className="sr-only"> accostato a </span>
+      <span className="title-pair__art"><span className="title-pair__arrow" aria-hidden="true"><Icon name="arrowsLR" /></span>{art?.title}</span>
     </Tag>
   );
 }
 
-export function Avatar({ name, size = '' }) {
-  return <span className={`avatar ${size ? `avatar--${size}` : ''}`}>{name?.trim()?.[0]?.toUpperCase() ?? '?'}</span>;
+/**
+ * Avatar: la foto profilo se l'utente ne ha una, altrimenti l'iniziale.
+ * Con `has` noto (false) non si chiede nulla al server; senza, si prova e si ricade sull'iniziale.
+ */
+export function Avatar({ name, username, has, version, size = '' }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [username, version]);
+  const showPhoto = username && has !== false && !failed;
+  return (
+    <span className={`avatar ${size ? `avatar--${size}` : ''} ${showPhoto ? 'avatar--photo' : ''}`}>
+      {showPhoto && (
+        <img src={avatarUrl(username, version)} alt="" loading="lazy"
+          onError={() => setFailed(true)}
+          onLoad={(e) => { if (!e.currentTarget.naturalWidth) setFailed(true); }} />
+      )}
+      {!showPhoto && (name?.trim()?.[0]?.toUpperCase() ?? '?')}
+    </span>
+  );
 }
 
 export function Footer() {
