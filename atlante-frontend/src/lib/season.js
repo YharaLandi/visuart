@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 // Atmosfere stagionali: si accendono da sole in un periodo dell'anno e si spengono da sole
 // alla fine, senza bisogno di un nuovo rilascio. Chi non le vuole può spegnerle dalle
 // impostazioni (la scelta vale fino alla stagione successiva).
@@ -57,7 +59,19 @@ export const HALLOWEEN_TITLES = ['Shining', 'Suspiria', 'The Lighthouse'];
 export function phantomOpen(date = new Date()) {
   const forced = new URLSearchParams(window.location.search).get('reparto');
   if (forced) return forced === 'aperto';
-  return date.getMonth() === 9;
+  // chi passa alla versione normale non vede il reparto
+  return date.getMonth() === 9 && !isSeasonOff('halloween');
+}
+
+/** Si aggiorna quando l'utente cambia versione (rassegna o normale). */
+export function useSeasonVersion() {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    const bump = () => setV((x) => x + 1);
+    window.addEventListener('visuart:season', bump);
+    return () => window.removeEventListener('visuart:season', bump);
+  }, []);
+  return v;
 }
 
 const AGE_KEY = 'visuart_phantom_16';

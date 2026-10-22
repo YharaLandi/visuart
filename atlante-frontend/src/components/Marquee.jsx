@@ -30,6 +30,15 @@ export function SignLine({ text, tone, start = 0, small = false }) {
   );
 }
 
+/** Titolo di pagina come striscia d'insegna: le pagine interne parlano la lingua del cartellone. */
+export function PageSign({ text }) {
+  return (
+    <h1 className="mq-sign mq-sign--page">
+      <span className="mq-sign__panel"><SignLine text={text} tone="ink" /></span>
+    </h1>
+  );
+}
+
 /**
  * L'insegna a lettere mobili: in cartellone un'opera CON un'altra (film o dipinto).
  * size="sm" è la versione in testa a ogni connessione.

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { imgUrl, phantom as phantomApi } from '../api/client';
 import Layout from '../components/ui/Layout';
+import { PageSign } from '../components/Marquee';
 import { ErrorState, Loading } from '../components/ui/States';
 import { OriginDialog, TYPES } from './PhantomPage';
 import '../styles/phantom.css';
@@ -29,7 +30,7 @@ export default function CuriositiesPage() {
     <Layout>
       <div className="container phantom phantom--plain">
         <header className="page-head">
-          <h1 className="h-page">Curiosità</h1>
+          <PageSign text="Curiosità" />
           <p className="lead">Da dove vengono i film e i quadri dell’archivio: un racconto, un luogo, un’altra opera. Scelte e scritte dalla redazione.</p>
         </header>
 

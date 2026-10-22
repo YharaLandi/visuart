@@ -8,7 +8,7 @@ import { ROLE_LABEL, timeAgo } from '../../lib/format';
 import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
 import { Avatar, Brand, Footer } from './Visual';
-import { isSeasonOff, phantomOpen, seasonOf, setSeasonOff } from '../../lib/season';
+import { isSeasonOff, phantomOpen, seasonOf, setSeasonOff, useSeasonVersion } from '../../lib/season';
 
 const LINKS = [
   ['/connessioni', 'Più viste', 'compass', 'Più viste'],
@@ -33,7 +33,7 @@ function SeasonSwitch() {
   return (
     <button type="button" className={`season-switch ${off ? '' : 'is-on'}`} onClick={toggle}
       aria-pressed={!off} title={off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}>
-      <Icon name="moon-stars" /> {off ? 'Halloween' : 'Versione normale'}
+      <Icon name={off ? 'moon-stars' : 'sun'} /><span className="sr-only">{off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}</span>
     </button>
   );
 }
@@ -207,6 +207,7 @@ function Bell() {
 }
 
 export function NavBar({ minimal = false }) {
+  useSeasonVersion();
   const { user } = useAuth();
   const { chatUnread } = useApp();
   const navigate = useNavigate();

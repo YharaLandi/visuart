@@ -4,6 +4,7 @@ import Layout from '../components/ui/Layout';
 import { useAuth } from '../context/AuthContext';
 import { ROLE_LABEL } from '../lib/format';
 import Icon from '../components/ui/Icon';
+import { PageSign } from '../components/Marquee';
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -35,8 +36,7 @@ export default function AdminPage() {
     <Layout>
       <div className="container">
         <header className="page-head">
-          <p className="eyebrow">Amministrazione</p>
-          <h1 className="h-page">Gestione utenti</h1>
+          <PageSign text="Gestione utenti" />
           <p className="lead">Assegna i ruoli e modera l’archivio. Cambiare ruolo chiude le sessioni aperte dell’utente.</p>
         </header>
 

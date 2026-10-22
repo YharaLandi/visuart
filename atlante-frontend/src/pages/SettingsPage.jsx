@@ -7,6 +7,7 @@ import { Avatar } from '../components/ui/Visual';
 import { useAuth } from '../context/AuthContext';
 import { getTheme, setTheme } from '../lib/theme';
 import { isSeasonOff, seasonOf, setSeasonOff } from '../lib/season';
+import { PageSign } from '../components/Marquee';
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{12,}$/;
 
@@ -104,8 +105,7 @@ export default function SettingsPage() {
     <Layout>
       <div className="container settings-page">
         <header className="page-head" style={{ paddingTop: 40 }}>
-          <p className="eyebrow">Il tuo spazio nell’archivio</p>
-          <h1 className="h-page">Impostazioni</h1>
+          <PageSign text="Impostazioni" />
           <p className="lead">Come ti presenti nell’archivio, come proteggi il tuo account, cosa ricevi per mail.</p>
         </header>
 

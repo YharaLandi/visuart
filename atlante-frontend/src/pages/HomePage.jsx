@@ -5,7 +5,7 @@ import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
 import { kindLabel, pairOf } from '../lib/format';
 import Marquee from '../components/Marquee';
-import { activeSeason, HALLOWEEN_TITLES, phantomOpen } from '../lib/season';
+import { activeSeason, HALLOWEEN_TITLES, phantomOpen, useSeasonVersion } from '../lib/season';
 
 /** Le due bacheche sotto l'insegna: le due opere della coppia dietro il vetro. */
 function Showcase({ conn }) {
@@ -51,6 +51,7 @@ function BillRow({ conn, onShow }) {
 }
 
 export default function HomePage() {
+  useSeasonVersion();
   const [all, setAll] = useState(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [shown, setShown] = useState(null);
@@ -103,7 +104,7 @@ export default function HomePage() {
                   <label htmlFor="mq-q">Cerca in cartellone</label>
                   <div className="mq-search__row">
                     <input id="mq-q" type="search" value={q} onChange={(e) => setQ(e.target.value)}
-                      placeholder="Un film, un’opera, un regista, un pittore" autoComplete="off" />
+                      placeholder="Film, opera, autore" autoComplete="off" />
                     <button type="submit" disabled={searching}>
                       <Icon name="search" /> {searching ? 'Cerco…' : 'Cerca'}
                     </button>

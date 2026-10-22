@@ -68,7 +68,6 @@ export default function UserProfilePage() {
     <Layout>
       <div className="container">
         <header className="page-head" style={{ paddingTop: 40 }}>
-          <p className="eyebrow">Uno sguardo nell’archivio</p>
           <h1 className="h-page">{profile.displayName}</h1>
         </header>
 

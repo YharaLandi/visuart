@@ -7,6 +7,7 @@ import Layout from '../components/ui/Layout';
 import { Avatar } from '../components/ui/Visual';
 import { useAuth } from '../context/AuthContext';
 import { monthYear, n, ROLE_DESCRIPTION, ROLE_LABEL } from '../lib/format';
+import { PageSign } from '../components/Marquee';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -24,8 +25,7 @@ export default function ProfilePage() {
     <Layout>
       <div className="container">
         <header className="page-head" style={{ paddingTop: 40 }}>
-          <p className="eyebrow">Il tuo spazio nell’archivio</p>
-          <h1 className="h-page">Il mio profilo</h1>
+          <PageSign text="Il mio profilo" />
         </header>
 
         <div className="profile">

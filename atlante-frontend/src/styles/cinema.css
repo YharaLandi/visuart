@@ -552,3 +552,46 @@ h1.mq-sign { margin-top: 8px; }
 .palette-editor__hex input[aria-invalid="true"] { color: var(--danger); }
 .palette-editor__hint { margin: 0; font-size: 0.8125rem; color: var(--text-muted); }
 .palette-editor__hint.is-error { color: var(--danger); }
+
+/* ---------- correzioni dall'analisi dello slop ---------- */
+
+/* niente righe decorative sullo sfondo: la facciata è smalto pieno, il manifesto carta */
+:root, :root[data-season="halloween"] { --wall-lines: none !important; }
+
+/* etichettine sopra i titoli: restano solo dove dicono qualcosa (reparto fantasma) */
+.page-head > .eyebrow { display: none; }
+
+/* titolo di pagina come striscia d'insegna */
+.mq-sign--page { margin: 8px 0 18px; padding: 14px; display: inline-block; max-width: 100%; }
+.mq-sign--page::before, .mq-sign--page::after { display: none; }
+.mq-sign--page .mq-sign__panel { --tile-h: clamp(30px, 3.4vw, 48px); padding: 12px 18px; justify-items: start; }
+.mq-sign--page .mq-line { text-align: left; }
+.mq-sign--page .mq-line__tiles { justify-content: flex-start; }
+.mq-sign--page .mq-tile { animation-duration: 380ms; }
+
+/* dettaglio: ombra da stampa al posto dei bordi al neon */
+.detail-frames figure:first-child .frame__img,
+.detail-frames figure:last-child .frame__img { box-shadow: 0 14px 24px -16px rgba(0, 0, 0, 0.75) !important; }
+
+/* filtri come linguette del programma: testo, sottolineatura sulla scelta attiva */
+.chips { gap: 4px 18px; }
+.chip, .chip--active, .chip[aria-pressed="true"] {
+  min-height: 36px; padding: 0 2px; background: none !important; border: 0 !important;
+  border-bottom: 3px solid transparent !important; border-radius: 0 !important; color: var(--text-muted) !important;
+}
+.chip:hover { color: var(--text-1) !important; }
+.chip--active, .chip[aria-pressed="true"] { color: var(--text-1) !important; border-bottom-color: var(--bulb) !important; }
+:root[data-theme="light"] .chip--active, :root[data-theme="light"] .chip[aria-pressed="true"] { border-bottom-color: var(--text-1) !important; }
+/* i comandi del grafo restano pulsanti */
+.graph__controls .chip { border: 1px solid var(--line-3) !important; padding: 0 10px; border-radius: 3px !important; }
+
+/* etichette dei campi nella stessa voce dei titoli */
+.field__label { font-family: var(--font-display) !important; font-weight: 700; letter-spacing: 0.1em; font-size: 0.85rem !important; }
+
+/* parole orfane: niente ultima parola da sola */
+p { text-wrap: pretty; }
+
+/* mobile: i contenuti finiscono sopra la barra in basso */
+@media (max-width: 1080px) {
+  .page__main { padding-bottom: calc(var(--sp-8) + 80px + env(safe-area-inset-bottom)); }
+}

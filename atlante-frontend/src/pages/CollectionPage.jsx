@@ -7,6 +7,7 @@ import Layout from '../components/ui/Layout';
 import { Loading } from '../components/ui/States';
 import { Motif } from '../components/ui/Visual';
 import { useApp } from '../context/AppContext';
+import { PageSign } from '../components/Marquee';
 
 const FILTERS = [['all', 'Tutte'], ['FILM', 'Film'], ['ARTWORK', 'Opere']];
 
@@ -31,8 +32,7 @@ export default function CollectionPage() {
     <Layout>
       <div className="container">
         <header className="page-head">
-          <p className="eyebrow">Il tuo atlante personale</p>
-          <h1 className="h-page">La mia collezione</h1>
+          <PageSign text="La mia collezione" />
           <p className="lead">Conserva le opere che ti fanno fermare. Il prossimo accostamento potrebbe cominciare qui.</p>
         </header>
 

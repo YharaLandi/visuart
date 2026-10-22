@@ -7,6 +7,7 @@ import Icon from '../components/ui/Icon';
 import Layout from '../components/ui/Layout';
 import { ErrorState, Loading } from '../components/ui/States';
 import { useAuth } from '../context/AuthContext';
+import { PageSign } from '../components/Marquee';
 
 const PAGE_SIZE = 9;
 // "In primo piano" usa il punteggio di popolarità del server: mi piace, commenti e viste, con un leggero peso alla novità
@@ -53,8 +54,7 @@ export default function ConnectionsPage() {
     <Layout>
       <div className="container">
         <header className="page-head">
-          <p className="eyebrow">L’archivio · Sguardi condivisi</p>
-          <h1 className="h-page">Le connessioni più viste</h1>
+          <PageSign text="Le connessioni più viste" />
           <p className="lead">
             Accostamenti da osservare, interpretazioni da discutere. Lasciati guidare da una luce, una forma, un colore.
           </p>

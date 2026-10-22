@@ -93,7 +93,6 @@ export default function SearchPage() {
         <button className="btn btn--ghost btn--sm" onClick={() => navigate(-1)}><Icon name="close" /> Chiudi</button>
       </header>
       <main className="page__main container search-hero">
-        <p className="eyebrow eyebrow--light">Ricerca negli archivi</p>
         <h1 className="h-page">Trova il prossimo dialogo.</h1>
         <label className="field search-input">
           <span className="field__label">Cerca un titolo, un autore, un regista</span>
