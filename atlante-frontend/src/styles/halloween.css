@@ -58,12 +58,6 @@
   --wall-lines: none;
 }
 
-/* il cielo della rassegna: una luna bassa dietro la pagina */
-:root[data-season="halloween"] body {
-  background:
-    radial-gradient(circle at 88% 6%, rgba(255, 170, 90, 0.16) 0 90px, rgba(162, 116, 255, 0.08) 90px 340px, transparent 520px),
-    var(--wall-lines), var(--bg);
-}
 :root[data-season="halloween"] .tabbar,
 :root[data-season="halloween"][data-theme="light"] .tabbar { background: var(--surface-1); }
 

@@ -86,6 +86,11 @@ export const works = {
   create: (data) => api.post('/api/works', data),
 };
 
+/** Reparto fantasma: film horror e la loro origine (leggenda, mito, romanzo, cronaca). */
+export const phantom = {
+  list: () => api.get('/api/phantom'),
+};
+
 /** Immagine caricata dall'utente (fotogramma, dettaglio di un quadro, opera non negli archivi). */
 export const uploads = {
   image: (file) => {

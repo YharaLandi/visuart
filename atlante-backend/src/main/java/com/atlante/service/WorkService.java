@@ -20,12 +20,15 @@ public class WorkService {
     private final com.atlante.repository.FavoriteRepository favoriteRepository;
     private final com.atlante.repository.WorkImageRepository workImageRepository;
     private final ImageUploadService imageUploads;
+    private final com.atlante.repository.HorrorOriginRepository horrorOrigins;
 
     public WorkService(WorkRepository workRepository,
                        com.atlante.repository.ConnectionRepository connectionRepository,
                        com.atlante.repository.FavoriteRepository favoriteRepository,
                        com.atlante.repository.WorkImageRepository workImageRepository,
-                       ImageUploadService imageUploads) {
+                       ImageUploadService imageUploads,
+                       com.atlante.repository.HorrorOriginRepository horrorOrigins) {
+        this.horrorOrigins = horrorOrigins;
         this.imageUploads = imageUploads;
         this.workRepository = workRepository;
         this.connectionRepository = connectionRepository;
@@ -101,6 +104,7 @@ public class WorkService {
         }
         favoriteRepository.deleteAll(favoriteRepository.findByWorkId(id));
         workImageRepository.findByWorkId(id).ifPresent(workImageRepository::delete);
+        horrorOrigins.findByFilmId(id).ifPresent(horrorOrigins::delete);
         workRepository.delete(work);
     }
 }

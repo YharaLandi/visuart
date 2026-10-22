@@ -49,3 +49,24 @@ export function setSeasonOff(name, off) {
 
 /** Film horror messi in evidenza durante la rassegna di Halloween. */
 export const HALLOWEEN_TITLES = ['Shining', 'Suspiria', 'The Lighthouse'];
+
+/**
+ * Reparto fantasma: aperto solo nel mese di ottobre (?reparto=aperto per vederlo fuori mese).
+ * Il 1° novembre la voce sparisce dal menu e la pagina dice che il reparto è chiuso.
+ */
+export function phantomOpen(date = new Date()) {
+  const forced = new URLSearchParams(window.location.search).get('reparto');
+  if (forced) return forced === 'aperto';
+  return date.getMonth() === 9;
+}
+
+const AGE_KEY = 'visuart_phantom_16';
+
+/** Conferma dell'età: vale per l'edizione di quest'anno, poi si richiede. */
+export function phantomAgeConfirmed() {
+  return localStorage.getItem(AGE_KEY) === String(new Date().getFullYear());
+}
+
+export function confirmPhantomAge() {
+  localStorage.setItem(AGE_KEY, String(new Date().getFullYear()));
+}

@@ -5,7 +5,7 @@ import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
 import { kindLabel, pairOf } from '../lib/format';
 import Marquee from '../components/Marquee';
-import { activeSeason, HALLOWEEN_TITLES } from '../lib/season';
+import { activeSeason, HALLOWEEN_TITLES, phantomOpen } from '../lib/season';
 
 /** Le due bacheche sotto l'insegna: le due opere della coppia dietro il vetro. */
 function Showcase({ conn }) {
@@ -141,6 +141,14 @@ export default function HomePage() {
             </ul>
           )}
         </section>
+
+        {phantomOpen() && (
+          <Link to="/reparto-fantasma" className="mq-wrap mq-phantom-door">
+            <span className="mq-phantom-door__t">Reparto fantasma</span>
+            <span className="mq-phantom-door__d">Solo a ottobre: da dove vengono i film horror. 16+</span>
+            <Icon name="arrowRight" />
+          </Link>
+        )}
 
         <nav className="mq-wrap mq-doors" aria-label="Altri modi di guardare">
           <Link to="/grafo" className="mq-door">

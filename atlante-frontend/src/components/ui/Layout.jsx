@@ -9,6 +9,7 @@ import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
 import { Avatar, Brand, Footer } from './Visual';
 import Bats from '../Bats';
+import { phantomOpen } from '../../lib/season';
 
 const LINKS = [
   ['/connessioni', 'Più viste', 'compass', 'Più viste'],
@@ -16,6 +17,9 @@ const LINKS = [
   ['/collezione', 'La mia collezione', 'bookmark', 'Collezione'],
   ['/chat', 'Chat', 'chat', 'Chat'],
 ];
+
+// voce di ottobre: compare nel menu solo mentre il reparto fantasma è aperto
+const PHANTOM_LINK = ['/reparto-fantasma', 'Reparto fantasma'];
 
 function useClickOutside(open, setOpen) {
   const ref = useRef(null);
@@ -198,8 +202,8 @@ export function NavBar({ minimal = false }) {
         <Brand />
         {!minimal && (
           <nav className="nav__links" aria-label="Sezioni">
-            {LINKS.map(([to, label]) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `nav__link ${isActive ? 'nav__link--active' : ''}`}>
+            {[...LINKS, ...(phantomOpen() ? [PHANTOM_LINK] : [])].map(([to, label]) => (
+              <NavLink key={to} to={to} className={({ isActive }) => `nav__link ${to === '/reparto-fantasma' ? 'nav__link--phantom' : ''} ${isActive ? 'nav__link--active' : ''}`}>
                 {label}
                 {to === '/chat' && chatUnread > 0 && <span className="count">{chatUnread}</span>}
               </NavLink>
