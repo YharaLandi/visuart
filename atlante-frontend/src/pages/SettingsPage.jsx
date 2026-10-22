@@ -6,6 +6,7 @@ import Layout from '../components/ui/Layout';
 import { Avatar } from '../components/ui/Visual';
 import { useAuth } from '../context/AuthContext';
 import { getTheme, setTheme } from '../lib/theme';
+import { isSeasonOff, seasonOf, setSeasonOff } from '../lib/season';
 
 const PASSWORD_RULE = /^(?=.*[A-Z])(?=.*\d).{12,}$/;
 
@@ -29,6 +30,8 @@ export default function SettingsPage() {
   const [msg, setMsg] = useState({});
   const [busy, setBusy] = useState(null);
   const [theme, setThemeState] = useState(getTheme);
+  const season = seasonOf();
+  const [seasonOff, setSeasonOffState] = useState(() => (season ? isSeasonOff(season) : false));
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
@@ -168,19 +171,30 @@ export default function SettingsPage() {
               </form>
             </Section>
 
-            <Section id="aspetto" icon="circle-half" title="Aspetto" intro="Scegli tra la galleria scura e la carta avorio. La scelta resta su questo dispositivo.">
+            <Section id="aspetto" icon="circle-half" title="Aspetto" intro="Scegli tra la facciata di sera e il manifesto di giorno. La scelta resta su questo dispositivo.">
               <div className="settings__row" style={{ marginTop: 20 }}>
                 <button type="button" role="switch" aria-checked={theme === 'light'} className="switch" onClick={toggleTheme}>
                   <span className="switch__track">
                     <span className="switch__thumb"><Icon name={theme === 'light' ? 'sun' : 'moon-stars'} /></span>
                   </span>
-                  Tema carta avorio
+                  Manifesto di giorno
                 </button>
               </div>
               <div className="theme-options" aria-hidden="true">
-                <span className="theme-swatch"><i style={{ background: '#0b0d10' }} /> Galleria scura</span>
-                <span className="theme-swatch"><i style={{ background: '#f6f1e7' }} /> Carta avorio</span>
+                <span className="theme-swatch"><i style={{ background: '#0c0c0e' }} /> Facciata di sera</span>
+                <span className="theme-swatch"><i style={{ background: '#e9e9e4' }} /> Manifesto di giorno</span>
               </div>
+              {season === 'halloween' && (
+                <div className="settings__row" style={{ marginTop: 20 }}>
+                  <button type="button" role="switch" aria-checked={!seasonOff} className="switch"
+                    onClick={() => { setSeasonOff('halloween', !seasonOff); setSeasonOffState(!seasonOff); }}>
+                    <span className="switch__track">
+                      <span className="switch__thumb"><Icon name="moon-stars" /></span>
+                    </span>
+                    Rassegna di Halloween: arancio, viola e pipistrelli fino al 31 ottobre
+                  </button>
+                </div>
+              )}
             </Section>
 
             <Section id="notifiche" icon="envelope" title="Mail" intro="Ricevi un riepilogo con critiche, mi piace, commenti, opere salvate e messaggi.">

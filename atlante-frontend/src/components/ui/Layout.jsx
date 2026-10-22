@@ -8,6 +8,7 @@ import { ROLE_LABEL, timeAgo } from '../../lib/format';
 import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
 import { Avatar, Brand, Footer } from './Visual';
+import Bats from '../Bats';
 
 const LINKS = [
   ['/connessioni', 'Più viste', 'compass', 'Più viste'],
@@ -260,6 +261,7 @@ export default function Layout({ children, minimalNav = false, footer = true, ta
       <main className="page__main">{children}</main>
       {footer && <Footer />}
       {tabs && <TabBar />}
+      <Bats />
     </div>
   );
 }

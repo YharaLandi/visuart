@@ -16,6 +16,7 @@ import SettingsPage from './pages/SettingsPage';
 import UserProfilePage from './pages/UserProfilePage';
 import './styles/visuart.css';
 import './styles/cinema.css';
+import './styles/halloween.css';
 
 /** Le pagine personali chiedono l'accesso e poi riportano dove si voleva andare. */
 function RequireAuth({ children, admin = false }) {

@@ -1,4 +1,4 @@
-// Tema dell'interfaccia: "dark" (galleria scura, predefinito) o "light" (carta avorio).
+// Tema dell'interfaccia: "dark" (facciata di sera, predefinito) o "light" (manifesto di giorno).
 // La scelta resta sul dispositivo; index.html la applica prima del primo render.
 const KEY = 'visuart_theme';
 

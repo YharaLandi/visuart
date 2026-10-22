@@ -1,0 +1,114 @@
+/* ==========================================================================
+   Rassegna di Halloween: arancio zucca e viola notte al posto della luce gialla.
+   Vale solo con html[data-season="halloween"], che season.js accende dal 20 al 31 ottobre.
+   I film passano al viola e i quadri restano arancio, così la coppia resta leggibile.
+   ========================================================================== */
+
+:root[data-season="halloween"] {
+  --bg: #0e0a14;
+  --surface-1: #17111f;
+  --surface-2: #1d1527;
+  --surface-3: #281d36;
+  --line-1: #241a31;
+  --line-2: #33264a;
+  --line-3: #4a3768;
+  --text-1: #f1ebf7;
+  --text-2: #d9cfe6;
+  --text-muted: #b3a6c6;
+  --film: #b68cff;
+  --film-ring: #a274ff;
+  --film-soft: #a274ff1f;
+  --art: #ff8a2b;
+  --art-ring: #ff7a1a;
+  --art-soft: #ff7a1a1f;
+  --film-2: #e0c4ff;
+  --art-2: #ffc078;
+  --bulb: #ff7a1a;
+  --on-bulb: #140b04;
+  --nav-bg: #0e0a14e0;
+  --mq-bulb: #ff8a2b;
+  --mq-panel: #f6eee4;
+  --mq-panel-glow: rgba(255, 122, 26, 0.45);
+  --mq-film: #6d3fd1;
+  --mq-art: #d4540a;
+  --wall-lines: repeating-linear-gradient(90deg, transparent 0 119px, #a274ff0a 119px 120px);
+}
+
+:root[data-season="halloween"][data-theme="light"] {
+  --bg: #f3ebe0;
+  --surface-1: #fbf6ef;
+  --surface-2: #f1e7da;
+  --surface-3: #e3d4c1;
+  --line-1: #dccbb6;
+  --line-2: #c7b197;
+  --line-3: #2a1640;
+  --text-1: #1d1029;
+  --text-2: #2f1d40;
+  --text-muted: #5b4a6b;
+  --film: #5b2db8;
+  --film-ring: #6d3fd1;
+  --film-soft: #6d3fd114;
+  --art: #b8460a;
+  --art-ring: #d4540a;
+  --art-soft: #d4540a14;
+  --film-2: #3d6bb8;
+  --art-2: #8a5200;
+  --bulb: #ff7a1a;
+  --nav-bg: #ff7a1a;
+  --wall-lines: none;
+}
+
+/* il cielo della rassegna: una luna bassa dietro la pagina */
+:root[data-season="halloween"] body {
+  background:
+    radial-gradient(circle at 88% 6%, rgba(255, 170, 90, 0.16) 0 90px, rgba(162, 116, 255, 0.08) 90px 340px, transparent 520px),
+    var(--wall-lines), var(--bg);
+}
+:root[data-season="halloween"] .tabbar,
+:root[data-season="halloween"][data-theme="light"] .tabbar { background: var(--surface-1); }
+
+/* ---------- pipistrelli ---------- */
+.bats { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
+.bat {
+  position: absolute;
+  left: 0;
+  width: var(--size);
+  /* sagoma viola scuro con alone arancio: si stacca sia dal buio sia dalla carta */
+  color: #2b1745;
+  filter: drop-shadow(0 0 2px rgba(255, 140, 50, 0.9)) drop-shadow(0 0 10px rgba(255, 122, 26, 0.55));
+  animation: bat-fly var(--dur) linear var(--delay) infinite;
+  transform: translateX(-80px);
+  opacity: 0;
+}
+:root[data-theme="light"] .bat { color: #2a1640; }
+.bat svg { display: block; width: 100%; fill: currentColor; animation: bat-flap 0.34s ease-in-out infinite alternate; transform-origin: 50% 60%; }
+.bat--rtl { animation-name: bat-fly-rtl; }
+.bat--rtl svg { scale: -1 1; }
+
+@keyframes bat-flap {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0.45) translateY(2px); }
+}
+/* volo da sinistra a destra con un'ondulazione: entra, attraversa e sparisce fuori pagina */
+@keyframes bat-fly {
+  0% { transform: translate(-80px, 0); opacity: 0; }
+  4% { opacity: 1; }
+  25% { transform: translate(25vw, -28px); }
+  50% { transform: translate(50vw, 12px); }
+  75% { transform: translate(75vw, -22px); }
+  96% { opacity: 1; }
+  100% { transform: translate(calc(100vw + 80px), 6px); opacity: 0; }
+}
+@keyframes bat-fly-rtl {
+  0% { transform: translate(calc(100vw + 80px), 0); opacity: 0; }
+  4% { opacity: 1; }
+  25% { transform: translate(75vw, 22px); }
+  50% { transform: translate(50vw, -14px); }
+  75% { transform: translate(25vw, 18px); }
+  96% { opacity: 1; }
+  100% { transform: translate(-80px, -6px); opacity: 0; }
+}
+/* chi chiede meno movimento non vede pipistrelli */
+@media (prefers-reduced-motion: reduce) { .bats { display: none; } }
+/* sul telefono ne bastano tre */
+@media (max-width: 760px) { .bat:nth-child(n + 4) { display: none; } }

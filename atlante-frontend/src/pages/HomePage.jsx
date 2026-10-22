@@ -5,6 +5,7 @@ import Layout from '../components/ui/Layout';
 import Icon from '../components/ui/Icon';
 import { kindLabel, pairOf } from '../lib/format';
 import Marquee from '../components/Marquee';
+import { activeSeason, HALLOWEEN_TITLES } from '../lib/season';
 
 /** Le due bacheche sotto l'insegna: le due opere della coppia dietro il vetro. */
 function Showcase({ conn }) {
@@ -76,7 +77,12 @@ export default function HomePage() {
     }
   };
 
-  const featured = shown ?? all?.[0];
+  // durante la rassegna di Halloween l'insegna mette in cartellone la connessione horror più popolare
+  const halloween = activeSeason() === 'halloween';
+  const horror = halloween
+    ? all?.find((c) => [c.source.title, c.target.title].some((t) => HALLOWEEN_TITLES.includes(t)))
+    : null;
+  const featured = shown ?? horror ?? all?.[0];
   const bill = results ? results.list : (all ?? []).slice(0, 8);
 
   return (
@@ -85,7 +91,7 @@ export default function HomePage() {
         <section className="mq-facade" aria-labelledby="mq-title">
           <h1 id="mq-title" className="sr-only">VisuArt: film e dipinti in cartellone insieme</h1>
           <div className="mq-wrap">
-            <Marquee conn={featured} label={shown ? 'Anche in programma' : 'In cartellone'} />
+            <Marquee conn={featured} label={shown ? 'Anche in programma' : horror ? 'Rassegna di Halloween' : 'In cartellone'} />
             <div className="mq-under">
               <Showcase conn={featured} />
               <div className="mq-booth">
