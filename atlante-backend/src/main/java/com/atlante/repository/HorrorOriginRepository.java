@@ -13,4 +13,8 @@ public interface HorrorOriginRepository extends JpaRepository<HorrorOrigin, Long
     List<HorrorOrigin> findAllWithFilm();
 
     Optional<HorrorOrigin> findByFilmId(Long filmId);
+
+    /** Le righe senza sezione appartengono al reparto fantasma. */
+    @Query("select o from HorrorOrigin o join fetch o.film f where coalesce(o.section, 'FANTASMA') = :section order by f.year asc")
+    List<HorrorOrigin> findBySection(String section);
 }

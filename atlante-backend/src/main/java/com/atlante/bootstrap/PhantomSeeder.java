@@ -15,7 +15,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Reparto fantasma: film horror e la loro origine. Le curiosità sono fatti documentati e senza
+ * Reparto fantasma (film e quadri horror) e curiosità generali, curate dalla redazione. Le curiosità sono fatti documentati e senza
  * dettagli macabri; per il true crime c'è solo il nome del caso e il link a Wikipedia.
  * Gira prima dell'archivio, così le locandine dei film nuovi arrivano con le altre immagini.
  */
@@ -32,7 +32,7 @@ public class PhantomSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (origins.count() > 0) return;
+        long before = origins.count();
 
         origin("Nosferatu il vampiro", "F. W. Murnau", 1922, "LETTERATURA", "Dracula di Bram Stoker", 1897,
                 "Era un adattamento non autorizzato del romanzo: gli eredi di Stoker fecero causa e un tribunale "
@@ -89,15 +89,98 @@ public class PhantomSeeder implements CommandLineRunner {
                         + "per settimane durante una tempesta, e le superstizioni dei marinai.",
                 "https://en.wikipedia.org/wiki/Smalls_Lighthouse");
 
-        log.info("Reparto fantasma: {} film con la loro origine", origins.count());
+        // quadri del reparto fantasma
+        art("Saturno che divora i suoi figli", "Francisco Goya", 1823, "MITO", "Il mito di Crono", null,
+                "Goya lo dipinse direttamente sui muri della sua casa, la Quinta del Sordo, tra le Pitture nere: "
+                        + "non era destinato al pubblico. Solo più tardi fu staccato e portato su tela.",
+                "https://it.wikipedia.org/wiki/Saturno_che_divora_i_suoi_figli", HorrorOrigin.FANTASMA);
+        art("L’urlo", "Edvard Munch", 1893, "STORIA", "Una passeggiata al tramonto a Oslo", 1892,
+                "Munch annotò nel diario una sera in cui il cielo diventò rosso mentre camminava con due amici "
+                        + "sul fiordo: da quel ricordo nacquero diverse versioni del quadro.",
+                "https://it.wikipedia.org/wiki/L%27urlo", HorrorOrigin.FANTASMA);
+        art("Il giardino delle delizie", "Hieronymus Bosch", 1500, "STORIA", "Le visioni del Medioevo fiammingo", null,
+                "Il pannello di destra mostra un inferno pieno di strumenti musicali giganti: uno spartito dipinto "
+                        + "su una figura è stato perfino trascritto e suonato.",
+                "https://it.wikipedia.org/wiki/Trittico_del_Giardino_delle_delizie", HorrorOrigin.FANTASMA);
+        art("L’incubo", "Johann Heinrich Füssli", 1781, "FOLKLORE", "Il demone della notte del folklore", null,
+                "Il folletto seduto sulla dormiente è il demone che nelle credenze popolari opprimeva chi dormiva. "
+                        + "Il quadro fece scandalo e venne copiato e parodiato per decenni.",
+                "https://it.wikipedia.org/wiki/L%27incubo", HorrorOrigin.FANTASMA);
+
+        // curiosità generali, tutto l'anno
+        curiosity("Nighthawks", WorkType.ARTWORK, "STORIA", "Un diner del Greenwich Village", 1942,
+                "Hopper disse che il quadro gli era stato suggerito da un ristorante su Greenwich Avenue, a New York, "
+                        + "dove due strade si incontrano.",
+                "https://it.wikipedia.org/wiki/Nighthawks");
+        curiosity("Viandante sul mare di nebbia", WorkType.ARTWORK, "STORIA", "Le montagne di arenaria dell'Elba", 1818,
+                "Il paesaggio non esiste così: Friedrich montò in studio vedute diverse delle montagne dell'Elba, "
+                        + "in Sassonia, come un collage.",
+                "https://it.wikipedia.org/wiki/Viandante_sul_mare_di_nebbia");
+        curiosity("La grande onda di Kanagawa", WorkType.ARTWORK, "STORIA", "Le Trentasei vedute del Monte Fuji", 1831,
+                "È una stampa di una serie dedicata al Fuji: il monte è il piccolo cono bianco sullo sfondo, "
+                        + "quasi nascosto dall'onda.",
+                "https://it.wikipedia.org/wiki/La_grande_onda_di_Kanagawa");
+        curiosity("Notte stellata", WorkType.ARTWORK, "STORIA", "La finestra di Saint-Rémy", 1889,
+                "Van Gogh la dipinse guardando dalla finestra della sua stanza nella casa di cura di Saint-Rémy; "
+                        + "il paese in basso è in buona parte inventato.",
+                "https://it.wikipedia.org/wiki/Notte_stellata");
+        curiosity("Las Meninas", WorkType.ARTWORK, "STORIA", "Lo studio di Velázquez", 1656,
+                "Velázquez si è dipinto al lavoro, a sinistra, davanti a una grande tela; nello specchio in fondo "
+                        + "compaiono i re di Spagna.",
+                "https://it.wikipedia.org/wiki/Las_Meninas");
+        curiosity("2001: Odissea nello spazio", WorkType.FILM, "LETTERATURA", "La sentinella di Arthur C. Clarke", 1951,
+                "Il film nasce da un breve racconto di Clarke su un oggetto lasciato sulla Luna; il romanzo venne "
+                        + "scritto in parallelo al film.",
+                "https://it.wikipedia.org/wiki/La_sentinella_(racconto)");
+        curiosity("Blade Runner 2049", WorkType.FILM, "LETTERATURA", "Il romanzo di Philip K. Dick", 1968,
+                "Il mondo di Blade Runner viene da Ma gli androidi sognano pecore elettriche?, romanzo di Philip K. Dick.",
+                "https://it.wikipedia.org/wiki/Ma_gli_androidi_sognano_pecore_elettriche%3F");
+        curiosity("Grand Budapest Hotel", WorkType.FILM, "LETTERATURA", "Gli scritti di Stefan Zweig", null,
+                "Wes Anderson ha dichiarato di essersi ispirato ai racconti e ai ricordi di Stefan Zweig sull'Europa "
+                        + "prima delle guerre.",
+                "https://it.wikipedia.org/wiki/Grand_Budapest_Hotel");
+        curiosity("Lost in Translation", WorkType.FILM, "STORIA", "Il Park Hyatt di Tokyo", 2003,
+                "Gran parte del film è girata nell'hotel Park Hyatt di Tokyo, dove Sofia Coppola aveva soggiornato "
+                        + "in passato.",
+                "https://it.wikipedia.org/wiki/Lost_in_Translation_-_L%27amore_tradotto");
+        curiosity("Il favoloso mondo di Amélie", WorkType.FILM, "STORIA", "Il caffè di Montmartre", 2001,
+                "Il bar dove lavora Amélie esiste davvero: è il Café des Deux Moulins, a Montmartre, a Parigi.",
+                "https://it.wikipedia.org/wiki/Il_favoloso_mondo_di_Am%C3%A9lie");
+
+        log.info("Reparto fantasma e curiosità: {} voci ({} nuove)", origins.count(), origins.count() - before);
     }
 
     private void origin(String title, String director, int year, String type, String originTitle,
                         Integer originYear, String trivia, String url) {
-        Work film = works.findAll().stream()
-                .filter(w -> w.getType() == WorkType.FILM && w.getTitle().equalsIgnoreCase(title))
-                .findFirst()
-                .orElseGet(() -> works.save(new Work(WorkType.FILM, title, director, year)));
-        origins.save(new HorrorOrigin(film, type, originTitle, originYear, trivia, url));
+        add(work(WorkType.FILM, title, director, year), type, originTitle, originYear, trivia, url, HorrorOrigin.FANTASMA);
+    }
+
+    private void art(String title, String artist, int year, String type, String originTitle,
+                     Integer originYear, String trivia, String url, String section) {
+        add(work(WorkType.ARTWORK, title, artist, year), type, originTitle, originYear, trivia, url, section);
+    }
+
+    /** Curiosità su un'opera che è già nell'archivio (se non c'è, la voce si salta). */
+    private void curiosity(String title, WorkType kind, String type, String originTitle,
+                           Integer originYear, String trivia, String url) {
+        find(kind, title).ifPresent(w -> add(w, type, originTitle, originYear, trivia, url, HorrorOrigin.CURIOSITA));
+    }
+
+    private java.util.Optional<Work> find(WorkType kind, String title) {
+        return works.findAll().stream()
+                .filter(w -> w.getType() == kind && w.getTitle().equalsIgnoreCase(title))
+                .findFirst();
+    }
+
+    private Work work(WorkType kind, String title, String creator, int year) {
+        return find(kind, title).orElseGet(() -> works.save(new Work(kind, title, creator, year)));
+    }
+
+    /** Una voce per opera: se esiste già, non si tocca. */
+    private void add(Work work, String type, String originTitle, Integer originYear, String trivia, String url, String section) {
+        if (origins.findByFilmId(work.getId()).isPresent()) return;
+        HorrorOrigin o = new HorrorOrigin(work, type, originTitle, originYear, trivia, url);
+        o.setSection(section);
+        origins.save(o);
     }
 }

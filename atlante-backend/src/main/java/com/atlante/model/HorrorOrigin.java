@@ -16,6 +16,14 @@ public class HorrorOrigin {
             java.util.List.of("FOLKLORE", "MITO", "LEGGENDA", "LETTERATURA", "STORIA", "CRONACA", "TRUE_CRIME");
     public static final String TRUE_CRIME = "TRUE_CRIME";
 
+    /** Sezioni: il reparto fantasma (solo a ottobre, 16+) e le curiosità generali di tutto l'anno. */
+    public static final String FANTASMA = "FANTASMA";
+    public static final String CURIOSITA = "CURIOSITA";
+
+    /** Vuoto sulle righe create prima delle sezioni: valgono come reparto fantasma. */
+    @Column(length = 12)
+    private String section;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,6 +62,8 @@ public class HorrorOrigin {
     }
 
     public Long getId() { return id; }
+    public String getSection() { return section == null ? FANTASMA : section; }
+    public void setSection(String section) { this.section = section; }
     public Work getFilm() { return film; }
     public String getType() { return type; }
     public String getOriginTitle() { return originTitle; }

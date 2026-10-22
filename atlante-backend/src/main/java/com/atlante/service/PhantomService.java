@@ -4,7 +4,6 @@ import com.atlante.dto.Dtos.WorkResponse;
 import com.atlante.exception.ResourceNotFoundException;
 import com.atlante.model.HorrorOrigin;
 import com.atlante.model.Work;
-import com.atlante.model.WorkType;
 import com.atlante.repository.HorrorOriginRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,26 +44,30 @@ public class PhantomService {
                                 @NotBlank @Size(max = 160) String originTitle,
                                 Integer originYear,
                                 @Size(max = 500) String trivia,
-                                @NotBlank String wikipediaUrl) {
+                                @NotBlank String wikipediaUrl,
+                                String section) {
     }
 
     public record OriginResponse(Long id, WorkResponse film, String type, String originTitle,
-                                 Integer originYear, String trivia, String wikipediaUrl) {
+                                 Integer originYear, String trivia, String wikipediaUrl, String section) {
         static OriginResponse from(HorrorOrigin o) {
             return new OriginResponse(o.getId(), WorkResponse.from(o.getFilm()), o.getType(), o.getOriginTitle(),
-                    o.getOriginYear(), o.getTrivia(), o.getWikipediaUrl());
+                    o.getOriginYear(), o.getTrivia(), o.getWikipediaUrl(), o.getSection());
         }
     }
 
     @Transactional(readOnly = true)
-    public List<OriginResponse> list() {
-        return origins.findAllWithFilm().stream().map(OriginResponse::from).toList();
+    public List<OriginResponse> list(String section) {
+        return origins.findBySection(section).stream().map(OriginResponse::from).toList();
     }
 
     public OriginResponse save(OriginRequest req) {
+        // "film" per ragioni storiche: può essere un film o un quadro
         Work film = workService.getEntity(req.filmId());
-        if (film.getType() != WorkType.FILM) {
-            throw new IllegalArgumentException("Il reparto fantasma raccoglie solo film.");
+        String section = req.section() == null || req.section().isBlank()
+                ? HorrorOrigin.FANTASMA : req.section().trim().toUpperCase(Locale.ROOT);
+        if (!HorrorOrigin.FANTASMA.equals(section) && !HorrorOrigin.CURIOSITA.equals(section)) {
+            throw new IllegalArgumentException("Sezione non valida: FANTASMA o CURIOSITA");
         }
         String type = req.type().trim().toUpperCase(Locale.ROOT);
         if (!HorrorOrigin.TYPES.contains(type)) {
@@ -84,6 +87,7 @@ public class PhantomService {
         HorrorOrigin o = origins.findByFilmId(film.getId())
                 .orElseGet(() -> new HorrorOrigin(film, type, req.originTitle().trim(), req.originYear(), trivia, url));
         o.setType(type);
+        o.setSection(section);
         o.setOriginTitle(req.originTitle().trim());
         o.setOriginYear(req.originYear());
         o.setTrivia(trivia);

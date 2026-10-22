@@ -16,25 +16,31 @@ import java.util.List;
  * le origini le scrivono solo curatori e amministratori.
  */
 @RestController
-@RequestMapping("/api/phantom")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PhantomController {
 
     private final PhantomService phantom;
 
-    @GetMapping
-    public List<OriginResponse> list() {
-        return phantom.list();
+    @GetMapping("/phantom")
+    public List<OriginResponse> phantomList() {
+        return phantom.list(com.atlante.model.HorrorOrigin.FANTASMA);
     }
 
-    @PostMapping
+    /** Curiosità su film e quadri, tutto l'anno: stesse regole del reparto fantasma. */
+    @GetMapping("/curiosities")
+    public List<OriginResponse> curiosities() {
+        return phantom.list(com.atlante.model.HorrorOrigin.CURIOSITA);
+    }
+
+    @PostMapping("/phantom")
     @PreAuthorize("hasAnyRole('CURATOR','ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public OriginResponse save(@Valid @RequestBody OriginRequest req) {
         return phantom.save(req);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/phantom/{id}")
     @PreAuthorize("hasAnyRole('CURATOR','ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

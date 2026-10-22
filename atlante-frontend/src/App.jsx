@@ -15,6 +15,7 @@ import SearchPage from './pages/SearchPage';
 import SettingsPage from './pages/SettingsPage';
 import UserProfilePage from './pages/UserProfilePage';
 import PhantomPage from './pages/PhantomPage';
+import CuriositiesPage from './pages/CuriositiesPage';
 import './styles/visuart.css';
 import './styles/cinema.css';
 import './styles/halloween.css';
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/profilo" element={<RequireAuth><ProfilePage /></RequireAuth>} />
             <Route path="/utenti/:username" element={<UserProfilePage />} />
             <Route path="/reparto-fantasma" element={<PhantomPage />} />
+            <Route path="/curiosita" element={<CuriositiesPage />} />
             <Route path="/impostazioni" element={<RequireAuth><SettingsPage /></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth admin><AdminPage /></RequireAuth>} />
             <Route path="/nuova-critica" element={<RequireAuth><NewCritiquePage /></RequireAuth>} />

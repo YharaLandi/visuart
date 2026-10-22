@@ -68,7 +68,8 @@ public class ArchiveSeeder implements CommandLineRunner {
             Map.entry("La morte di Marat", "The Death of Marat"),
             Map.entry("Il giardino delle delizie", "The Garden of Earthly Delights"),
             Map.entry("Composizione VIII", "Composition VIII"),
-            Map.entry("Ninfee", "Water Lilies (Monet series)"));
+            Map.entry("Ninfee", "Water Lilies (Monet series)"),
+            Map.entry("L’incubo", "The Nightmare (Fuseli)"));
 
     @Override
     public void run(String... args) {

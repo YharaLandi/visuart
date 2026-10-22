@@ -191,7 +191,7 @@ export default function SettingsPage() {
                     <span className="switch__track">
                       <span className="switch__thumb"><Icon name="moon-stars" /></span>
                     </span>
-                    Rassegna di Halloween: arancio, viola e pipistrelli fino al 31 ottobre
+                    Rassegna di Halloween: arancio e viola fino al 31 ottobre
                   </button>
                 </div>
               )}

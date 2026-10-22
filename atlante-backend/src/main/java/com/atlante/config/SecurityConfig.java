@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/works/**", "/api/connections/**",
                                 "/api/graph/**", "/api/categories/**", "/api/ai/**",
-                                "/api/search/**", "/images/**", "/api/users/*/profile", "/api/users/*/avatar", "/api/phantom").permitAll()
+                                "/api/search/**", "/images/**", "/api/users/*/profile", "/api/users/*/avatar", "/api/phantom", "/api/curiosities").permitAll()
                         // anche le visite anonime contano nelle viste
                         .requestMatchers(HttpMethod.POST, "/api/connections/*/view").permitAll()
                         .anyRequest().authenticated())

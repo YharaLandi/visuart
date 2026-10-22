@@ -8,8 +8,7 @@ import { ROLE_LABEL, timeAgo } from '../../lib/format';
 import { getTheme, setTheme } from '../../lib/theme';
 import Icon from './Icon';
 import { Avatar, Brand, Footer } from './Visual';
-import Bats from '../Bats';
-import { phantomOpen } from '../../lib/season';
+import { isSeasonOff, phantomOpen, seasonOf, setSeasonOff } from '../../lib/season';
 
 const LINKS = [
   ['/connessioni', 'Più viste', 'compass', 'Più viste'],
@@ -20,6 +19,24 @@ const LINKS = [
 
 // voce di ottobre: compare nel menu solo mentre il reparto fantasma è aperto
 const PHANTOM_LINK = ['/reparto-fantasma', 'Reparto fantasma'];
+const CURIOSITY_LINK = ['/curiosita', 'Curiosità'];
+
+/**
+ * Durante la rassegna di Halloween: un clic per tornare alla versione normale del sito
+ * (e per rientrare nella rassegna). La scelta vale fino alla rassegna dell'anno dopo.
+ */
+function SeasonSwitch() {
+  const season = seasonOf();
+  const [off, setOff] = useState(() => (season ? isSeasonOff(season) : false));
+  if (season !== 'halloween') return null;
+  const toggle = () => { setSeasonOff(season, !off); setOff(!off); };
+  return (
+    <button type="button" className={`season-switch ${off ? '' : 'is-on'}`} onClick={toggle}
+      aria-pressed={!off} title={off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}>
+      <Icon name="moon-stars" /> {off ? 'Halloween' : 'Versione normale'}
+    </button>
+  );
+}
 
 function useClickOutside(open, setOpen) {
   const ref = useRef(null);
@@ -202,7 +219,7 @@ export function NavBar({ minimal = false }) {
         <Brand />
         {!minimal && (
           <nav className="nav__links" aria-label="Sezioni">
-            {[...LINKS, ...(phantomOpen() ? [PHANTOM_LINK] : [])].map(([to, label]) => (
+            {[...LINKS, CURIOSITY_LINK, ...(phantomOpen() ? [PHANTOM_LINK] : [])].map(([to, label]) => (
               <NavLink key={to} to={to} className={({ isActive }) => `nav__link ${to === '/reparto-fantasma' ? 'nav__link--phantom' : ''} ${isActive ? 'nav__link--active' : ''}`}>
                 {label}
                 {to === '/chat' && chatUnread > 0 && <span className="count">{chatUnread}</span>}
@@ -217,6 +234,7 @@ export function NavBar({ minimal = false }) {
               <Icon name="search" />
             </button>
           )}
+          {!minimal && <SeasonSwitch />}
           {/* sempre attiva da loggati: porta anche gli avvisi dei messaggi; il pulsante si nasconde via CSS */}
           {user && <Bell />}
           {!minimal && (
@@ -265,7 +283,6 @@ export default function Layout({ children, minimalNav = false, footer = true, ta
       <main className="page__main">{children}</main>
       {footer && <Footer />}
       {tabs && <TabBar />}
-      <Bats />
     </div>
   );
 }
