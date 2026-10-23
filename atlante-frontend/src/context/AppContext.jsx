@@ -7,11 +7,13 @@ const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
   const { user } = useAuth();
+  // si riparte solo quando cambia la persona, non quando il profilo viene riletto dal server
+  const username = user?.username ?? null;
   const [favIds, setFavIds] = useState(new Set());
   const [chatUnread, setChatUnread] = useState(0);
 
   const refreshFavorites = useCallback(() => {
-    if (!user) {
+    if (!username) {
       setFavIds(new Set());
       return Promise.resolve([]);
     }
@@ -21,15 +23,15 @@ export function AppProvider({ children }) {
         return works;
       })
       .catch(() => []);
-  }, [user]);
+  }, [username]);
 
   const refreshChatUnread = useCallback(() => {
-    if (!user) {
+    if (!username) {
       setChatUnread(0);
       return;
     }
     chatApi.unreadCount().then((r) => setChatUnread(r.unread)).catch(() => {});
-  }, [user]);
+  }, [username]);
 
   useEffect(() => {
     refreshFavorites();

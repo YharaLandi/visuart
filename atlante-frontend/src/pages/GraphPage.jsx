@@ -6,6 +6,7 @@ import { graph as graphApi, imgUrl } from '../api/client';
 import CategoryChips from '../components/CategoryChips';
 import Icon from '../components/ui/Icon';
 import Layout from '../components/ui/Layout';
+import { PageSign } from '../components/Marquee';
 import { ErrorState, Loading } from '../components/ui/States';
 import { PaletteBars } from '../components/ui/Visual';
 
@@ -18,7 +19,7 @@ function WorkNode({ data }) {
       style={{ '--ring': data.ring }}
     >
       <Handle type="target" position={Position.Top} />
-      <div className="gnode__c">{src && <img src={src} alt="" />}</div>
+      <div className="gnode__c">{src && <img src={src} alt="" loading="lazy" decoding="async" />}</div>
       <span className="gnode__type">{isArt ? 'OPERA D’ARTE' : 'FILM'}</span>
       <span className="gnode__title">{data.title}</span>
       <Handle type="source" position={Position.Bottom} />
@@ -213,7 +214,7 @@ function GraphCanvas() {
       <header className="container graph-head">
         <div className="page-head__row">
           <div>
-            <h1 className="h-page">Atlante delle affinità</h1>
+            <PageSign text="Atlante delle affinità" />
             <p className="lead">Ogni opera è un punto di partenza. Segui le relazioni, cambia prospettiva.</p>
           </div>
           <div className="legend" style={{ marginTop: 14 }}><span className="t-film">Film</span><span className="t-art">Opera d’arte</span></div>

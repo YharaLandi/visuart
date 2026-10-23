@@ -595,3 +595,32 @@ p { text-wrap: pretty; }
 @media (max-width: 1080px) {
   .page__main { padding-bottom: calc(var(--sp-8) + 80px + env(safe-area-inset-bottom)); }
 }
+
+/* ---------- polish: critica e audit ---------- */
+
+/* le strisce d'insegna dei titoli prendono la misura della parola, niente tavola vuota */
+.mq-sign--page { width: fit-content; }
+
+/* contatore delle notifiche leggibile anche sulla barra gialla di giorno */
+:root[data-theme="light"] .bell__count { background: #141414; color: #fff; }
+
+/* voce del reparto sulla barra di giorno: inchiostro pieno, non viola su giallo */
+:root[data-theme="light"] .nav__link--phantom { color: #141414 !important; text-shadow: none !important; }
+
+/* schermi molto stretti (320 px): azioni della barra più compatte, bacheche della home a misura */
+@media (max-width: 360px) {
+  .nav__actions { gap: 4px; }
+  .nav__actions .icon-btn, .season-switch { padding: 0 6px; min-width: 36px; }
+  .mq-under, .mq-cases { min-width: 0; }
+  .mq-cases { gap: 8px; }
+  .mq-booth, .mq-case { min-width: 0; max-width: 100%; }
+  .mq-wrap { width: calc(100% - 24px); }
+}
+
+/* insegna del dettaglio su mobile: la categoria va a capo con il punto, non da solo */
+.mq-sign--sm .mq-line--small .mq-word { white-space: nowrap; }
+/* 320 px: il logo si accorcia ai due cerchi, così le azioni della barra entrano; i filtri scorrono */
+@media (max-width: 360px) {
+  .nav .brand__name { display: none; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+}

@@ -296,10 +296,10 @@ export function Shell({ rightText, children, caption }) {
         <Brand dim />
         {rightText && <span className="nav__right-text">{rightText}</span>}
       </header>
-      <div className="shell__body">
+      <main className="shell__body">
         {children}
         {caption && <p className="shell__caption">{caption}</p>}
-      </div>
+      </main>
     </div>
   );
 }

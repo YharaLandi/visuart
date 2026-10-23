@@ -220,3 +220,6 @@
 .phantom-card__poster.frame--art img { height: auto !important; max-height: 300px; object-fit: contain; }
 .phantom-card__poster.frame--art { --frame-w: 14px; }
 .phantom-card__poster.frame--art img { padding: 8px !important; }
+/* il reparto ha sempre la sala buia: anche il piè di pagina resta leggibile di giorno */
+.page:has(.phantom:not(.phantom--plain)) .footer,
+.page:has(.phantom:not(.phantom--plain)) .footer a { color: #b3a6c6; border-top-color: #33264a; }
