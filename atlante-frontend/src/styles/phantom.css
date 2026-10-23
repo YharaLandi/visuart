@@ -223,3 +223,9 @@
 .phantom-card__poster.frame--art { width: fit-content; max-width: 100%; }
 .phantom-card__poster.frame--art img { max-height: calc(var(--stage, 280px) - 28px); width: auto; max-width: 100%; }
 @media (max-width: 640px) { .phantom-card { --stage: 220px; } }
+/* i poster dei film occupano tutta la colonna (2:3 per tutti, quindi alti uguali): la didascalia
+   parte dal bordo del poster; lo spazio di altezza fissa resta solo per i quadri */
+.phantom-card:has(.frame--film) { grid-template-rows: auto auto auto auto; }
+.phantom-card__poster.frame--film { width: 100%; height: auto; max-height: none; justify-self: stretch; }
+/* anche le cornici dei quadri partono dal bordo sinistro della colonna, come la didascalia */
+.phantom-card__poster.frame--art { justify-self: start; }
