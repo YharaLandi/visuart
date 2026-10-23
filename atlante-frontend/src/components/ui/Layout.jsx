@@ -25,15 +25,38 @@ const CURIOSITY_LINK = ['/curiosita', 'Curiosità'];
  * Durante la rassegna di Halloween: un clic per tornare alla versione normale del sito
  * (e per rientrare nella rassegna). La scelta vale fino alla rassegna dell'anno dopo.
  */
+// due icone nello stesso tratto (1.6 px, 20 px), in stile con le icone della barra
+const SVG = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+
+/** Pipistrello: accende la rassegna di Halloween. */
+function BatIcon() {
+  return (
+    <svg {...SVG}>
+      <path d="M12 8.5c-.9 0-1.4-.9-1.6-1.9-.6.6-.9 1.4-.9 2.3C7.8 7.6 5.4 7 2.5 7.4c1.3 1 2 2.4 2 4 1-.6 2.3-.7 3.4-.2-.4 1-.3 2.2.4 3.1.9-1.2 2.3-1.7 3.7-1.4v0c1.4-.3 2.8.2 3.7 1.4.7-.9.8-2.1.4-3.1 1.1-.5 2.4-.4 3.4.2 0-1.6.7-3 2-4-2.9-.4-5.3.2-7 1.5 0-.9-.3-1.7-.9-2.3-.2 1-.7 1.9-1.6 1.9Z" />
+    </svg>
+  );
+}
+
+/** Sole: torna alla versione normale del sito. */
+function SunIcon() {
+  return (
+    <svg {...SVG}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" />
+    </svg>
+  );
+}
+
 function SeasonSwitch() {
   const season = seasonOf();
   const [off, setOff] = useState(() => (season ? isSeasonOff(season) : false));
   if (season !== 'halloween') return null;
   const toggle = () => { setSeasonOff(season, !off); setOff(!off); };
   return (
-    <button type="button" className={`season-switch ${off ? '' : 'is-on'}`} onClick={toggle}
+    <button type="button" className="icon-btn season-switch" onClick={toggle}
       aria-pressed={!off} title={off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}>
-      <Icon name={off ? 'moon-stars' : 'sun'} /><span className="sr-only">{off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}</span>
+      {off ? <BatIcon /> : <SunIcon />}
+      <span className="sr-only">{off ? 'Torna alla rassegna di Halloween' : 'Passa alla versione normale'}</span>
     </button>
   );
 }

@@ -197,22 +197,12 @@
 .phantom-dialog__poster--art { aspect-ratio: auto !important; }
 .phantom-dialog__poster--art img { height: auto !important; object-fit: contain !important; }
 
-/* ---------- pulsante rapido della rassegna, nella barra ---------- */
-.season-switch {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px;
-  background: none; border: 1px solid var(--line-3); border-radius: 4px; color: var(--text-1); cursor: pointer;
-  font: 700 0.95rem/1 var(--font-display); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
-}
-.season-switch.is-on { border-color: var(--bulb); }
-.season-switch:hover { border-color: var(--bulb); color: var(--bulb); }
-@media (max-width: 760px) { .season-switch { font-size: 0; gap: 0; padding: 0 10px; } .season-switch .bi { font-size: 1.1rem; } }
+/* ---------- pulsante rapido della rassegna: un'icona come le altre della barra ---------- */
+.season-switch { color: inherit; }
+.season-switch:hover, .season-switch:focus-visible { color: inherit; opacity: 0.75; }
 /* barra: con Curiosità e Reparto fantasma le voci restano su una riga; sotto i 1280 px il pulsante della rassegna mostra solo l'icona */
 .nav__link { white-space: nowrap; }
-@media (max-width: 1280px) {
-  .season-switch { font-size: 0; gap: 0; padding: 0 10px; }
-  .season-switch .bi { font-size: 1.1rem; }
-  .nav__links { gap: 18px; }
-}
+@media (max-width: 1280px) { .nav__links { gap: 18px; } }
 
 /* quadreria: ogni cornice prende la forma del suo quadro, allineate alla base */
 .phantom-grid { align-items: end; }
@@ -223,3 +213,13 @@
 /* il reparto ha sempre la sala buia: anche il piè di pagina resta leggibile di giorno */
 .page:has(.phantom:not(.phantom--plain)) .footer,
 .page:has(.phantom:not(.phantom--plain)) .footer a { color: #b3a6c6; border-top-color: #33264a; }
+
+/* quadreria allineata: ogni opera sta in uno spazio della stessa altezza, poggiata sulla stessa
+   linea di base; le didascalie partono tutte alla stessa quota */
+.phantom-grid { align-items: start; }
+.phantom-card { grid-template-rows: var(--stage, 280px) auto auto auto; }
+.phantom-card__poster { align-self: end; justify-self: center; max-height: var(--stage, 280px); }
+.phantom-card__poster.frame--film { width: auto; height: 100%; aspect-ratio: 2 / 3; }
+.phantom-card__poster.frame--art { width: fit-content; max-width: 100%; }
+.phantom-card__poster.frame--art img { max-height: calc(var(--stage, 280px) - 28px); width: auto; max-width: 100%; }
+@media (max-width: 640px) { .phantom-card { --stage: 220px; } }
