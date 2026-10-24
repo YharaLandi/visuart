@@ -624,3 +624,36 @@ p { text-wrap: pretty; }
   .nav .brand__name { display: none; }
   .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
 }
+
+/* menu a tendina per tablet e telefono: le voci della barra non spariscono */
+.burger { display: none; }
+@media (max-width: 1080px) {
+  .nav__links, .nav__cta { display: none; }
+  .burger { display: block; }
+  .nav__actions { margin-left: auto; }
+  .burger__menu { right: 0; min-width: 240px; display: grid; gap: 2px; }
+  .burger__link { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px;
+    font-family: var(--font-display); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .burger__link--active { color: var(--bulb); }
+  :root[data-theme="light"] .burger__link--active { color: var(--art); }
+  .burger__link--cta { justify-content: flex-start; margin-top: 6px; border-top: 1px solid var(--line-1); padding-top: 10px; }
+}
+
+/* logo: biglietto del cineclub con matrice perforata e tacche ai lati */
+.brand-ticket {
+  --notch: 7px;
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 5px 16px 5px 10px;
+  background: var(--bulb); color: #141414;
+  -webkit-mask: radial-gradient(circle var(--notch) at 0 50%, #0000 96%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle var(--notch) at 100% 50%, #0000 96%, #000) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle var(--notch) at 0 50%, #0000 96%, #000) left / 51% 100% no-repeat,
+                radial-gradient(circle var(--notch) at 100% 50%, #0000 96%, #000) right / 51% 100% no-repeat;
+}
+.brand-ticket__stub { padding: 0 10px 0 6px; border-right: 2px dashed currentColor; font-size: 0.9rem; line-height: 1.9; }
+.brand-ticket .brand__name {
+  font-family: "Zilla Slab", Rockwell, Georgia, serif; font-weight: 700;
+  font-size: 1.45rem; letter-spacing: 0.02em; text-transform: none; color: inherit; line-height: 1.1;
+}
+:root[data-theme="light"] .brand-ticket { background: #141414; color: var(--bulb); }
+.brand--dim .brand-ticket { opacity: 0.75; }

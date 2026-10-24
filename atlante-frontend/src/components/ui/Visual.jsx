@@ -9,8 +9,11 @@ import { ringStyle, tonesOf } from '../../lib/format';
 export function Brand({ to = '/', dim = false }) {
   return (
     <Link to={to} className={`brand ${dim ? 'brand--dim' : ''}`} aria-label="VisuArt, home">
-      <span className="brand-mark"><i /><b /><i /></span>
-      <span className="brand__name">VisuArt</span>
+      {/* biglietto del cineclub: matrice con la stella, bordo perforato, nome in slab */}
+      <span className="brand-ticket">
+        <span className="brand-ticket__stub" aria-hidden="true">★</span>
+        <span className="brand__name">VisuArt</span>
+      </span>
     </Link>
   );
 }

@@ -229,6 +229,42 @@ function Bell() {
   );
 }
 
+/** Sotto i 1080 px le voci della barra finiscono in un menu a tendina. */
+function BurgerMenu({ links, chatUnread }) {
+  const [open, setOpen] = useState(false);
+  const ref = useClickOutside(open, setOpen);
+  const location = useLocation();
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  return (
+    <div className="menu-wrap burger" ref={ref}>
+      <button className="icon-btn burger__btn" onClick={() => setOpen((v) => !v)}
+        aria-label={open ? 'Chiudi il menu' : 'Apri il menu'} aria-expanded={open} aria-controls="burger-menu">
+        <Icon name={open ? 'close' : 'menu'} />
+      </button>
+      {open && (
+        <nav id="burger-menu" className="menu burger__menu" aria-label="Sezioni">
+          {links.map(([to, label]) => (
+            <NavLink key={to} to={to} className={({ isActive }) => `menu__item burger__link ${isActive ? 'burger__link--active' : ''}`}>
+              {label}
+              {to === '/chat' && chatUnread > 0 && <span className="count">{chatUnread}</span>}
+            </NavLink>
+          ))}
+          <NavLink to="/nuova-critica" className="menu__item burger__link burger__link--cta">
+            <Icon name="plus" /> Nuova critica
+          </NavLink>
+        </nav>
+      )}
+    </div>
+  );
+}
+
 export function NavBar({ minimal = false }) {
   useSeasonVersion();
   const { user } = useAuth();
@@ -236,6 +272,7 @@ export function NavBar({ minimal = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const next = encodeURIComponent(location.pathname + location.search);
+  const links = [...LINKS, CURIOSITY_LINK, ...(phantomOpen() ? [PHANTOM_LINK] : [])];
 
   return (
     <header className={`nav ${minimal ? 'nav--minimal' : ''}`}>
@@ -243,7 +280,7 @@ export function NavBar({ minimal = false }) {
         <Brand />
         {!minimal && (
           <nav className="nav__links" aria-label="Sezioni">
-            {[...LINKS, CURIOSITY_LINK, ...(phantomOpen() ? [PHANTOM_LINK] : [])].map(([to, label]) => (
+            {links.map(([to, label]) => (
               <NavLink key={to} to={to} className={({ isActive }) => `nav__link ${to === '/reparto-fantasma' ? 'nav__link--phantom' : ''} ${isActive ? 'nav__link--active' : ''}`}>
                 {label}
                 {to === '/chat' && chatUnread > 0 && <span className="count">{chatUnread}</span>}
@@ -266,6 +303,7 @@ export function NavBar({ minimal = false }) {
               <Icon name="plus" /> Nuova critica
             </Link>
           )}
+          {!minimal && <BurgerMenu links={links} chatUnread={chatUnread} />}
           {user ? <AvatarMenu /> : (
             <Link to={`/accedi?next=${next}`} className="avatar" aria-label="Accedi">
               <Icon name="user" size={18} />

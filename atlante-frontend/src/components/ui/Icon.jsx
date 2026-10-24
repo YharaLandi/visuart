@@ -11,6 +11,7 @@ const BI = {
   arrowDown: 'arrow-down',
   arrowsLR: 'arrow-left-right',
   close: 'x-lg',
+  menu: 'list',
   chevronDown: 'chevron-down',
   chevronLeft: 'chevron-left',
   chevronRight: 'chevron-right',
