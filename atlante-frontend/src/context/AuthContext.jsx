@@ -14,6 +14,7 @@ function toUser(data) {
     createdAt: data.createdAt ?? null,
     hasAvatar: data.hasAvatar ?? false,
     avatarVersion: data.avatarVersion ?? null,
+    newsletter: data.newsletter ?? true,
   };
 }
 

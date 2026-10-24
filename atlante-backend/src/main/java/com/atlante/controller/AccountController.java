@@ -52,6 +52,13 @@ public class AccountController {
         return authService.toAuthResponse(user);
     }
 
+    /** Iscrizione alla newsletter settimanale. */
+    @PutMapping("/newsletter")
+    public UserResponse newsletter(@RequestBody com.atlante.dto.Dtos.NewsletterRequest req,
+                                   @AuthenticationPrincipal UserDetails principal) {
+        return UserResponse.from(accountService.setNewsletter(current(principal), req.enabled()));
+    }
+
     @GetMapping("/stats")
     public UserStats stats(@AuthenticationPrincipal UserDetails principal) {
         return accountService.stats(current(principal));

@@ -55,6 +55,11 @@ public class User implements UserDetails {
     @Column(name = "avatar_file", length = 120)
     private String avatarFile;
 
+    /** Newsletter settimanale: attiva per tutti, si disattiva dalle impostazioni o dal link nella mail. */
+    @Column(name = "newsletter", columnDefinition = "boolean default true not null")
+    @Builder.Default
+    private boolean newsletter = true;
+
     @Column(name = "created_at")
     @Builder.Default
     private java.time.Instant createdAt = java.time.Instant.now();

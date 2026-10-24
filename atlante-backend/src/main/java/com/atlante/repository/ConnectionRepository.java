@@ -32,4 +32,8 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long>,
             and (:slug is null or c.category.slug = :slug)
             """)
     List<Connection> findTouchingAny(@Param("workIds") List<Long> workIds, @Param("slug") String slug);
+
+    long countByCreatedAtAfter(java.time.Instant since);
+
+    java.util.List<com.atlante.model.Connection> findTop3ByCreatedAtAfterOrderByCreatedAtDesc(java.time.Instant since);
 }

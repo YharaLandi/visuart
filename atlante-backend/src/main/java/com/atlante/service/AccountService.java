@@ -38,6 +38,11 @@ public class AccountService {
         return userRepository.save(user);
     }
 
+    public User setNewsletter(User user, boolean enabled) {
+        user.setNewsletter(enabled);
+        return userRepository.save(user);
+    }
+
     /** Cambia password e chiude tutte le altre sessioni; restituisce l'utente per emettere un token nuovo. */
     public User changePassword(User user, String currentPassword, String newPassword) {
         requirePassword(user, currentPassword);

@@ -35,12 +35,16 @@ public final class Dtos {
 
     public record UserResponse(Long id, String username, String email, String displayName, String role,
                                String bio, java.time.Instant createdAt, boolean hasAvatar,
-                               java.util.List<String> roles) {
+                               java.util.List<String> roles, boolean newsletter) {
 
         public static UserResponse from(com.atlante.model.User u) {
             return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getDisplayName(),
-                    u.getRoleName(), u.getBio(), u.getCreatedAt(), u.getAvatarFile() != null, u.getRoleNames());
+                    u.getRoleName(), u.getBio(), u.getCreatedAt(), u.getAvatarFile() != null, u.getRoleNames(),
+                    u.isNewsletter());
         }
+    }
+
+    public record NewsletterRequest(boolean enabled) {
     }
 
     /** Profilo pubblico minimo: niente email, che resta privata. */

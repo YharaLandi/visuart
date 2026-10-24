@@ -96,6 +96,15 @@ public class MailService {
         send(to, "Reimposta la tua password", html);
     }
 
+    /** Invio sincrono, per chi gestisce già il proprio ciclo (newsletter). */
+    public void sendHtml(String to, String subject, String html) {
+        if (!isEnabled()) {
+            log.warn("Invio mail disattivato (MAIL_PASSWORD vuota): \"{}\" per {} non spedita", subject, to);
+            return;
+        }
+        send(to, subject, html);
+    }
+
     private void send(String to, String subject, String html) {
         try {
             MimeMessage message = sender.createMimeMessage();

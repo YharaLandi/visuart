@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     org.springframework.data.domain.Page<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
             String username, String email, org.springframework.data.domain.Pageable pageable);
+
+    java.util.List<User> findByNewsletterTrue();
 }

@@ -27,6 +27,11 @@ spring:
 
 app:
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  # indirizzo pubblico del backend, per le immagini nelle mail (Render lo fornisce da solo)
+  backend-url: ${BACKEND_URL:${RENDER_EXTERNAL_URL:http://localhost:8080}}
+  newsletter:
+    # domini degli account dimostrativi e di test, esclusi dall'invio
+    skip-domains: ${NEWSLETTER_SKIP_DOMAINS:atlante.local,visuart.it,test.local}
   mail:
     enabled: ${MAIL_ENABLED:true}
     from: ${MAIL_FROM:VisuArt <comunication.visuart@gmail.com>}

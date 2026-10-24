@@ -46,7 +46,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // l'handshake WebSocket e' pubblico: il JWT viene verificato sul frame STOMP CONNECT
                         .requestMatchers("/api/auth/**", "/ws/**", "/h2-console/**", "/actuator/health", "/error",
-                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/api/newsletter/unsubscribe").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/works/**", "/api/connections/**",
                                 "/api/graph/**", "/api/categories/**", "/api/ai/**",
                                 "/api/search/**", "/images/**", "/api/users/*/profile", "/api/users/*/avatar", "/api/phantom", "/api/curiosities").permitAll()

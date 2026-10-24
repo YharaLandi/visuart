@@ -54,6 +54,8 @@ async function request(path, options = {}) {
     return null;
   }
   const text = await res.text();
+  // l'anteprima della newsletter arriva come pagina HTML
+  if (!(res.headers.get('content-type') ?? '').includes('json')) return text;
   return text ? JSON.parse(text) : null;
 }
 
@@ -125,6 +127,7 @@ export const connections = {
 
 export const account = {
   me: () => api.get('/api/users/me'),
+  newsletter: (enabled) => api.put('/api/users/me/newsletter', { enabled }),
   update: (displayName, bio) => api.put('/api/users/me', { displayName, bio }),
   changePassword: (currentPassword, newPassword) =>
     api.put('/api/users/me/password', { currentPassword, newPassword }),
@@ -162,6 +165,8 @@ export const admin = {
   assignRoles: (id, roles) => api.put(`/api/admin/users/${id}/roles`, { roles }),
   remove: (id) => api.delete(`/api/admin/users/${id}`),
   roles: () => api.get('/api/admin/roles'),
+  newsletterPreview: () => api.get('/api/admin/newsletter/preview'),
+  newsletterSend: () => api.post('/api/admin/newsletter/send'),
   createRole: (name, description) => api.post('/api/admin/roles', { name, description }),
   deleteRole: (id) => api.delete(`/api/admin/roles/${id}`),
 };

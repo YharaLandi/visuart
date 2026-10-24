@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { account as accountApi } from '../api/client';
 import Icon from '../components/ui/Icon';
@@ -33,6 +33,15 @@ export default function SettingsPage() {
   const [theme, setThemeState] = useState(getTheme);
   const season = seasonOf();
   const [seasonOff, setSeasonOffState] = useState(() => (season ? isSeasonOff(season) : false));
+  const [newsletter, setNewsletter] = useState(user.newsletter ?? true);
+  // la scelta può essere cambiata anche dal link nella mail: si rilegge dal server
+  useEffect(() => { accountApi.me().then((me) => setNewsletter(me.newsletter)).catch(() => {}); }, []);
+  const toggleNewsletter = () => run('newsletter', async () => {
+    const me = await accountApi.newsletter(!newsletter);
+    setNewsletter(me.newsletter);
+    saveUser({ ...user, newsletter: me.newsletter });
+    return me.newsletter ? 'Iscrizione attiva: ci vediamo lunedì.' : 'Non riceverai più la newsletter.';
+  });
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
     setTheme(next);
@@ -198,6 +207,16 @@ export default function SettingsPage() {
             </Section>
 
             <Section id="notifiche" icon="envelope" title="Mail" intro="Ricevi un riepilogo con critiche, mi piace, commenti, opere salvate e messaggi.">
+              <div className="settings__row" style={{ marginTop: 20 }}>
+                <button type="button" role="switch" aria-checked={newsletter} className="switch"
+                  disabled={busy === 'newsletter'} onClick={toggleNewsletter}>
+                  <span className="switch__track">
+                    <span className="switch__thumb"><Icon name="envelope" /></span>
+                  </span>
+                  Newsletter del lunedì: la classifica delle connessioni più votate della settimana
+                </button>
+                {feedback('newsletter')}
+              </div>
               <div className="settings__row">
                 <button
                   className="btn btn--ghost btn--sm"

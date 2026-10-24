@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="it" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La settimana di VisuArt</title>
+</head>
+<!-- mail a tabelle e stili in linea: è l'unico HTML che i client di posta leggono tutti allo stesso modo -->
+<body style="margin:0;padding:0;background:#0e0d12;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0e0d12;">
+  <tr><td align="center" style="padding:28px 12px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;font-family:Georgia,'Times New Roman',serif;color:#f2efe6;">
+
+      <!-- testata: il biglietto del cineclub -->
+      <tr><td align="center" style="padding-bottom:22px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="background:#f5c542;">
+          <tr>
+            <td style="padding:8px 12px;border-right:2px dashed #141414;color:#141414;font-size:16px;">&#9733;</td>
+            <td style="padding:8px 18px;color:#141414;font-size:24px;font-weight:bold;font-family:Rockwell,'Zilla Slab',Georgia,serif;">VisuArt</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <tr><td align="center" style="font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#f5c542;">
+        Il programma della settimana
+      </td></tr>
+      <tr><td align="center" style="padding:6px 0 4px;font-size:30px;font-weight:bold;line-height:1.2;" th:text="${week}">17 – 24 ottobre</td></tr>
+      <tr><td align="center" style="padding:10px 24px 26px;font-size:16px;line-height:1.6;color:#cfc9bb;">
+        Ciao <span th:text="${name}">Elena</span>, ecco le connessioni che hanno raccolto più mi piace negli ultimi sette giorni.
+        <span th:if="${newCount > 0}">In archivio ne sono arrivate <strong style="color:#f2efe6;" th:text="${newCount}">4</strong> di nuove.</span>
+      </td></tr>
+
+      <!-- classifica -->
+      <tr th:if="${!chart.isEmpty()}"><td style="padding:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#f5c542;border-bottom:2px solid #f5c542;">
+        &#9733; In cartellone: le più votate
+      </td></tr>
+      <tr th:each="e : ${chart}"><td style="padding:16px 0;border-bottom:1px solid #2a2733;">
+        <a th:href="${e.link}" href="#" style="text-decoration:none;color:#f2efe6;display:block;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td width="58" valign="middle" style="font-size:44px;font-weight:bold;line-height:1;font-family:Rockwell,'Zilla Slab',Georgia,serif;"
+                  th:style="${e.rank == 1} ? 'font-size:44px;font-weight:bold;line-height:1;color:#f5c542;font-family:Rockwell,Georgia,serif;' : 'font-size:44px;font-weight:bold;line-height:1;color:#a59fb2;font-family:Rockwell,Georgia,serif;'"
+                  th:text="${e.rank}">1</td>
+              <td width="132" valign="middle" style="padding-right:14px;white-space:nowrap;">
+                <img th:if="${e.sourceImage}" th:src="${e.sourceImage}" width="60" height="84" alt="" style="display:inline-block;width:60px;height:84px;object-fit:cover;border:0;background:#2a2733;">
+                <img th:if="${e.targetImage}" th:src="${e.targetImage}" width="60" height="84" alt="" style="display:inline-block;width:60px;height:84px;object-fit:cover;border:0;margin-left:4px;background:#2a2733;">
+              </td>
+              <td valign="middle">
+                <div style="font-size:18px;font-weight:bold;line-height:1.3;" th:text="${e.title}">Shining × Las Meninas</div>
+                <div style="padding-top:4px;font-size:14px;color:#a59fb2;" th:text="${e.pair}">Stanley Kubrick · Diego Velázquez</div>
+                <div style="padding-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#f5c542;">
+                  &#9829; <span th:text="${e.likes}">12</span> mi piace &nbsp;·&nbsp; <span style="color:#a59fb2;">di <span th:text="${e.author}">Marta</span></span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </a>
+      </td></tr>
+
+      <!-- ultime arrivate -->
+      <tr th:if="${!fresh.isEmpty()}"><td style="padding:34px 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#f5c542;border-bottom:2px solid #f5c542;">
+        Prima visione: appena arrivate
+      </td></tr>
+      <tr th:each="e : ${fresh}"><td style="padding:12px 0;border-bottom:1px solid #2a2733;font-size:16px;">
+        <a th:href="${e.link}" href="#" style="color:#f2efe6;text-decoration:none;"><strong th:text="${e.title}">Titolo</strong></a>
+        <span style="color:#a59fb2;font-size:14px;"> — di <span th:text="${e.author}">Autore</span></span>
+      </td></tr>
+
+      <!-- invito -->
+      <tr><td align="center" style="padding:34px 0 10px;">
+        <a th:href="${site}" href="#" style="display:inline-block;background:#f5c542;color:#141414;padding:14px 28px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;">
+          Entra in sala
+        </a>
+      </td></tr>
+
+      <tr><td align="center" style="padding:28px 24px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#a59fb2;">
+        Ricevi questa mail perché sei iscritto a VisuArt. Arriva ogni lunedì.<br>
+        <a th:href="${unsubscribe}" href="#" style="color:#a59fb2;">Non voglio più riceverla</a>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

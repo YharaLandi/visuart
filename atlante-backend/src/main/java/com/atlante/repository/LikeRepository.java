@@ -27,6 +27,10 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query("select l.connection.id, count(l) from Like l where l.connection.id in :ids group by l.connection.id")
     List<Object[]> countByConnectionIds(@Param("ids") Collection<Long> ids);
 
+    /** Connessioni con più mi piace ricevuti da una certa data, dalla più votata. */
+    @Query("select l.connection, count(l) from Like l where l.createdAt >= :since group by l.connection order by count(l) desc, l.connection.id desc")
+    List<Object[]> topSince(@Param("since") java.time.Instant since, org.springframework.data.domain.Pageable page);
+
     @Query("select l.connection.id from Like l where l.user.username = :username and l.connection.id in :ids")
     List<Long> likedConnectionIds(@Param("username") String username, @Param("ids") Collection<Long> ids);
 }

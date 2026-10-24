@@ -14,6 +14,7 @@ export default function AdminPage() {
   const [error, setError] = useState(null);
   const [roles, setRoles] = useState([]);
   const [draft, setDraft] = useState({ name: '', description: '' });
+  const [notice, setNotice] = useState(null);
 
   const loadRoles = useCallback(() => {
     adminApi.roles().then(setRoles).catch((e) => setError(e.message));
@@ -114,6 +115,22 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+
+        <section style={{ marginTop: 40 }}>
+          <h2 className="field__label">Newsletter</h2>
+          <p className="small">Parte da sola ogni lunedì alle 9 per chi è iscritto. Qui puoi vederla o spedirla subito.</p>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginTop: 12 }}>
+            <button className="btn btn--ghost btn--sm" onClick={() => act(async () => {
+              const html = await adminApi.newsletterPreview();
+              window.open(URL.createObjectURL(new Blob([html], { type: 'text/html' })), '_blank', 'noopener');
+            })}>Anteprima</button>
+            <button className="btn btn--sm" onClick={() => window.confirm('Spedire adesso la newsletter a tutti gli iscritti?') && act(async () => {
+              const r = await adminApi.newsletterSend();
+              setNotice(`Newsletter spedita a ${r.recipients} iscritti.`);
+            })}>Spedisci ora</button>
+            {notice && <span className="small" role="status">{notice}</span>}
+          </div>
+        </section>
 
         <section style={{ marginTop: 40 }}>
           <h2 className="field__label">Ruoli</h2>
