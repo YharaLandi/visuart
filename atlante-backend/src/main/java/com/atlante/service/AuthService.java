@@ -23,6 +23,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
+    private final RoleService roleService;
 
     public AuthResponse register(RegisterRequest request) {
         String email = normalizeEmail(request.email());
@@ -41,7 +42,7 @@ public class AuthService {
                 .email(email)
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .displayName(request.displayName())
-                .role(Role.USER)
+                .roles(roleService.setOf())
                 .build();
 
         return toAuthResponse(userRepository.save(user));
@@ -90,6 +91,6 @@ public class AuthService {
 
     public AuthResponse toAuthResponse(User user) {
         return new AuthResponse(tokenService.issue(user), user.getUsername(),
-                user.getEmail(), user.getDisplayName(), user.getRole().name());
+                user.getEmail(), user.getDisplayName(), user.getRoleName());
     }
 }

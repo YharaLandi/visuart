@@ -30,6 +30,7 @@ public class DataSeeder implements CommandLineRunner {
     private final MetMuseumClient met;
     private final WikipediaClient wikipedia;
     private final ImportService importService;
+    private final com.atlante.service.RoleService roleService;
 
     @Value("${app.seed.password}")
     private String demoPassword;
@@ -37,7 +38,9 @@ public class DataSeeder implements CommandLineRunner {
     public DataSeeder(UserRepository users, CategoryRepository categories,
                       WorkRepository works, ConnectionRepository connections,
                       PasswordEncoder encoder, TmdbClient tmdb, MetMuseumClient met,
-                      WikipediaClient wikipedia, ImportService importService) {
+                      WikipediaClient wikipedia, ImportService importService,
+                      com.atlante.service.RoleService roleService) {
+        this.roleService = roleService;
         this.users = users;
         this.categories = categories;
         this.works = works;
@@ -60,14 +63,14 @@ public class DataSeeder implements CommandLineRunner {
                 .email("admin@atlante.local")
                 .passwordHash(encoder.encode(demoPassword))
                 .displayName("Yharetta")
-                .role(Role.ADMIN)
+                .roles(roleService.setOf(Role.ADMIN))
                 .build());
         users.save(User.builder()
                 .username("curatore")
                 .email("curatore@atlante.local")
                 .passwordHash(encoder.encode(demoPassword))
                 .displayName("Curatore Demo")
-                .role(Role.CURATOR)
+                .roles(roleService.setOf(Role.CURATOR))
                 .build());
 
         Category fotografia = categories.save(new Category("Fotografia", "fotografia"));

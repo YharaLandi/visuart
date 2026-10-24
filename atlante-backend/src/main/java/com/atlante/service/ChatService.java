@@ -171,7 +171,7 @@ public class ChatService {
                             c.getId(),
                             counterpart,
                             other.getDisplayName(),
-                            other.getRole().name(),
+                            other.getRoleName(),
                             messages.unread(c.getId(), username),
                             last.isEmpty() ? null : last.getFirst().getText(),
                             last.isEmpty() ? null : last.getFirst().getSentAt(),

@@ -62,7 +62,7 @@ public class CommentService {
     private void requireOwnerOrAdmin(Comment comment, String username, String message) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato"));
-        if (!comment.getAuthor().getId().equals(user.getId()) && user.getRole() != com.atlante.model.Role.ADMIN) {
+        if (!comment.getAuthor().getId().equals(user.getId()) && !user.hasRole(com.atlante.model.Role.ADMIN)) {
             throw new com.atlante.exception.UnauthorizedException(message);
         }
     }

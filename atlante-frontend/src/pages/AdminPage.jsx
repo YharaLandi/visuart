@@ -12,6 +12,13 @@ export default function AdminPage() {
   const [page, setPage] = useState(0);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [draft, setDraft] = useState({ name: '', description: '' });
+
+  const loadRoles = useCallback(() => {
+    adminApi.roles().then(setRoles).catch((e) => setError(e.message));
+  }, []);
+  useEffect(loadRoles, [loadRoles]);
 
   const load = useCallback(() => {
     adminApi.users(q, page).then(setData).catch((e) => setError(e.message));
@@ -27,9 +34,25 @@ export default function AdminPage() {
     try {
       await action();
       load();
+      loadRoles();
     } catch (e) {
       setError(e.message);
     }
+  };
+
+  const toggleRole = (u, name) => {
+    const current = u.roles ?? [u.role];
+    const next = current.includes(name) ? current.filter((r) => r !== name) : [...current, name];
+    act(() => adminApi.assignRoles(u.id, next));
+  };
+  const custom = roles.filter((r) => !r.system);
+
+  const createRole = (e) => {
+    e.preventDefault();
+    act(async () => {
+      await adminApi.createRole(draft.name, draft.description);
+      setDraft({ name: '', description: '' });
+    });
   };
 
   return (
@@ -67,6 +90,14 @@ export default function AdminPage() {
                       >
                         {Object.entries(ROLE_LABEL).map(([v, label]) => <option key={v} value={v}>{label}</option>)}
                       </select>
+                      {custom.length > 0 && (
+                        <div className="chips" style={{ marginTop: 6 }} role="group" aria-label={`Altri ruoli di ${u.displayName}`}>
+                          {custom.map((r) => (
+                            <button key={r.id} type="button" className="chip" aria-pressed={(u.roles ?? []).includes(r.name)}
+                              onClick={() => toggleRole(u, r.name)}>{r.name}</button>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       <button
@@ -83,6 +114,46 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+
+        <section style={{ marginTop: 40 }}>
+          <h2 className="field__label">Ruoli</h2>
+          <p className="small">I ruoli di sistema non si eliminano. Quelli creati qui si assegnano dalla tabella utenti.</p>
+          <div className="card" style={{ marginTop: 12, padding: '6px 18px 18px', overflowX: 'auto' }}>
+            <table className="admin-table">
+              <thead><tr><th>Nome</th><th>Descrizione</th><th>Utenti</th><th /></tr></thead>
+              <tbody>
+                {roles.map((r) => (
+                  <tr key={r.id}>
+                    <td><strong style={{ fontWeight: 600 }}>{ROLE_LABEL[r.name] ?? r.name}</strong>{r.system && <><br /><span className="tiny">di sistema</span></>}</td>
+                    <td className="small">{r.description}</td>
+                    <td className="small">{r.users}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      {!r.system && (
+                        <button className="btn btn--ghost btn--sm btn--danger"
+                          onClick={() => window.confirm(`Eliminare il ruolo ${r.name}? Chi lo ha lo perde.`) && act(() => adminApi.deleteRole(r.id))}>
+                          Elimina
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <form onSubmit={createRole} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', marginTop: 16 }}>
+            <label className="field" style={{ flex: '1 1 180px' }}>
+              <span className="field__label">Nuovo ruolo</span>
+              <input value={draft.name} maxLength={30} required placeholder="MODERATORE"
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+            </label>
+            <label className="field" style={{ flex: '2 1 260px' }}>
+              <span className="field__label">Descrizione</span>
+              <input value={draft.description} maxLength={200}
+                onChange={(e) => setDraft({ ...draft, description: e.target.value })} />
+            </label>
+            <button className="btn btn--sm" type="submit">Crea ruolo</button>
+          </form>
+        </section>
 
         {data && data.totalPages > 1 && (
           <div className="pager">

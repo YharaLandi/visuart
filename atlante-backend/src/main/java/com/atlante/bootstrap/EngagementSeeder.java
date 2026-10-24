@@ -38,6 +38,7 @@ public class EngagementSeeder implements CommandLineRunner {
     private final CommentRepository comments;
     private final PasswordEncoder encoder;
     private final JdbcTemplate jdbc;
+    private final com.atlante.service.RoleService roleService;
 
     @Value("${app.seed.password}")
     private String demoPassword;
@@ -84,7 +85,7 @@ public class EngagementSeeder implements CommandLineRunner {
         for (String[] p : AUDIENCE) {
             people.add(users.findByUsername(p[0]).orElseGet(() -> users.save(User.builder()
                     .username(p[0]).email(p[0] + "@visuart.it").passwordHash(encoder.encode(demoPassword))
-                    .displayName(p[1]).role(Role.USER).createdAt(since).build())));
+                    .displayName(p[1]).roles(roleService.setOf()).createdAt(since).build())));
         }
         for (String u : List.of("elena", "luca", "marta", "giulia", "andrea", "curatore")) {
             users.findByUsername(u).ifPresent(people::add);

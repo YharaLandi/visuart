@@ -45,6 +45,7 @@ public class DesignDemoSeeder implements CommandLineRunner {
     private final MessageRepository messages;
     private final PasswordEncoder encoder;
     private final JdbcTemplate jdbc;
+    private final com.atlante.service.RoleService roleService;
 
     @Value("${app.seed.password}")
     private String demoPassword;
@@ -144,10 +145,10 @@ public class DesignDemoSeeder implements CommandLineRunner {
         log.info("Contenuti demo del design caricati (accesso: elena / password demo)");
     }
 
-    private User person(String username, String email, String name, Role role, String bio, Instant since) {
+    private User person(String username, String email, String name, String role, String bio, Instant since) {
         return users.findByUsername(username).orElseGet(() -> users.save(User.builder()
                 .username(username).email(email).passwordHash(encoder.encode(demoPassword))
-                .displayName(name).role(role).bio(bio).createdAt(since).build()));
+                .displayName(name).roles(roleService.setOf(role)).bio(bio).createdAt(since).build()));
     }
 
     private Category category(String name, String slug) {

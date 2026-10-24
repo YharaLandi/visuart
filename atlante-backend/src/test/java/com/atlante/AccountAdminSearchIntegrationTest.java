@@ -36,6 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AccountAdminSearchIntegrationTest extends AbstractIntegrationTest {
 
+    @Autowired
+    com.atlante.service.RoleService roleService;
+
     @LocalServerPort
     int port;
     @Autowired
@@ -241,7 +244,7 @@ class AccountAdminSearchIntegrationTest extends AbstractIntegrationTest {
         JsonNode target = register(unique("bersaglio"));
         String adminName = unique("capo");
         User admin = users.save(User.builder().username(adminName).email(adminName + "@test.local")
-                .passwordHash("x").displayName("Capo").role(Role.ADMIN).build());
+                .passwordHash("x").displayName("Capo").roles(roleService.setOf(Role.ADMIN)).build());
         String adminToken = "Bearer " + tokens.issue(admin);
         Long targetId = users.findByUsername(target.get("username").asText()).orElseThrow().getId();
 

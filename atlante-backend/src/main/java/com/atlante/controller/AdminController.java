@@ -29,6 +29,7 @@ public class AdminController {
     private final UserRepository userRepository;
     private final AccountService accountService;
     private final TokenService tokenService;
+    private final com.atlante.service.RoleService roleService;
 
     @GetMapping
     public PageResponse<UserResponse> list(@RequestParam(defaultValue = "") String q,
@@ -48,10 +49,20 @@ public class AdminController {
         if (user.getUsername().equals(principal.getUsername())) {
             throw new IllegalArgumentException("Non puoi cambiare il tuo stesso ruolo");
         }
-        user.setRole(req.role());
-        // i permessi vengono riletti dal database a ogni richiesta: basta chiudere le sessioni aperte
-        tokenService.revokeAll(user);
-        return UserResponse.from(userRepository.save(user));
+        // il ruolo principale sostituisce i precedenti; USER resta sempre
+        return UserResponse.from(roleService.assign(user, java.util.List.of(req.role())));
+    }
+
+    /** Assegna all'utente esattamente questi ruoli, compresi quelli creati dall'admin. */
+    @PutMapping("/{id}/roles")
+    @Transactional
+    public UserResponse assignRoles(@PathVariable Long id, @Valid @RequestBody com.atlante.dto.Dtos.AssignRolesRequest req,
+                                    @AuthenticationPrincipal UserDetails principal) {
+        User user = find(id);
+        if (user.getUsername().equals(principal.getUsername()) && !req.roles().contains(com.atlante.model.Role.ADMIN)) {
+            throw new IllegalArgumentException("Non puoi toglierti il ruolo di amministratore");
+        }
+        return UserResponse.from(roleService.assign(user, req.roles()));
     }
 
     @DeleteMapping("/{id}")

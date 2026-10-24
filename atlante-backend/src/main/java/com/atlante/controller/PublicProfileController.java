@@ -34,7 +34,7 @@ public class PublicProfileController {
         return new PublicProfile(
                 user.getUsername(),
                 user.getDisplayName(),
-                user.getRole().name(),
+                user.getRoleName(),
                 user.getBio(),
                 user.getCreatedAt(),
                 connectionRepository.findByAuthor(user).size(),

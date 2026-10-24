@@ -25,11 +25,13 @@ class PhantomIntegrationTest extends AbstractIntegrationTest {
     WorkRepository works;
     @Autowired
     UserRepository users;
+    @Autowired
+    com.atlante.service.RoleService roleService;
 
     private String curator() throws Exception {
         JsonNode u = register(unique("curatrice"));
         var user = users.findByUsername(u.get("username").asText()).orElseThrow();
-        user.setRole(Role.CURATOR);
+        user.getRoles().add(roleService.get(Role.CURATOR));
         users.save(user);
         // il filtro JWT rilegge il ruolo dal database a ogni richiesta
         return "Bearer " + u.get("token").asText();

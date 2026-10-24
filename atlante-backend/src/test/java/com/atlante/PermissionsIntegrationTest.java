@@ -19,6 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PermissionsIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
+    com.atlante.service.RoleService roleService;
+
+    @Autowired
     CategoryRepository categories;
     @Autowired
     WorkRepository works;
@@ -38,7 +41,7 @@ class PermissionsIntegrationTest extends AbstractIntegrationTest {
     private String adminToken() {
         String name = unique("admin");
         return "Bearer " + tokens.issue(users.save(User.builder().username(name).email(name + "@test.local")
-                .passwordHash("x").displayName("Admin").role(Role.ADMIN).build()));
+                .passwordHash("x").displayName("Admin").roles(roleService.setOf(Role.ADMIN)).build()));
     }
 
     @Test

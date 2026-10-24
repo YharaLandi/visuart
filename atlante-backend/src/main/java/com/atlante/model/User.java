@@ -8,7 +8,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -36,10 +38,13 @@ public class User implements UserDetails {
     @Column(name = "display_name", length = 120)
     private String displayName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    /** Ruoli dell'utente (tabella user_roles): letti a ogni richiesta, quindi un cambio vale subito. */
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default
-    private Role role = Role.USER;
+    private Set<Role> roles = new HashSet<>();
 
     /** Breve frase personale mostrata nel profilo. */
     @Column(length = 300)
@@ -56,7 +61,26 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        return roles.stream().map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName())).toList();
+    }
+
+    public boolean hasRole(String name) {
+        return roles.stream().anyMatch(r -> r.getName().equals(name));
+    }
+
+    /**
+     * Il ruolo principale, quello mostrato accanto al nome: ADMIN, poi CURATOR, poi un ruolo creato
+     * dall'admin, infine USER.
+     */
+    public String getRoleName() {
+        if (hasRole(Role.ADMIN)) return Role.ADMIN;
+        if (hasRole(Role.CURATOR)) return Role.CURATOR;
+        return roles.stream().map(Role::getName).filter(n -> !n.equals(Role.USER)).sorted().findFirst()
+                .orElse(Role.USER);
+    }
+
+    public List<String> getRoleNames() {
+        return roles.stream().map(Role::getName).sorted().toList();
     }
 
     @Override

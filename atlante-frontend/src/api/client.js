@@ -159,7 +159,11 @@ export const admin = {
   users: (q = '', page = 0) =>
     api.get(`/api/admin/users?q=${encodeURIComponent(q)}&page=${page}&size=20`),
   changeRole: (id, role) => api.patch(`/api/admin/users/${id}/role`, { role }),
+  assignRoles: (id, roles) => api.put(`/api/admin/users/${id}/roles`, { roles }),
   remove: (id) => api.delete(`/api/admin/users/${id}`),
+  roles: () => api.get('/api/admin/roles'),
+  createRole: (name, description) => api.post('/api/admin/roles', { name, description }),
+  deleteRole: (id) => api.delete(`/api/admin/roles/${id}`),
 };
 
 export const likes = {

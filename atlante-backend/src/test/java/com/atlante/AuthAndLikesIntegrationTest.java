@@ -25,6 +25,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AuthAndLikesIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
+    com.atlante.service.RoleService roleService;
+
+    @Autowired
     CategoryRepository categories;
     @Autowired
     WorkRepository works;
@@ -148,7 +151,7 @@ class AuthAndLikesIntegrationTest extends AbstractIntegrationTest {
         // un admin può moderare anche le connessioni altrui
         String adminName = unique("admin");
         users.save(User.builder().username(adminName).email(adminName + "@test.local")
-                .passwordHash("x").displayName("Admin").role(Role.ADMIN).build());
+                .passwordHash("x").displayName("Admin").roles(roleService.setOf(Role.ADMIN)).build());
         String adminToken = "Bearer " + loginToken(adminName);
         mvc.perform(delete(url).header("Authorization", adminToken)).andExpect(status().isNoContent());
         mvc.perform(get(url)).andExpect(status().isNotFound());

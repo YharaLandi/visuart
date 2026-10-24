@@ -188,7 +188,7 @@ public class ConnectionService {
         User user = userService.findByUsername(username);
         boolean owner = connection.getAuthor() != null
                 && connection.getAuthor().getId().equals(user.getId());
-        if (!owner && user.getRole() != Role.ADMIN) {
+        if (!owner && !user.hasRole(Role.ADMIN)) {
             throw new UnauthorizedException(message);
         }
     }

@@ -34,11 +34,12 @@ public final class Dtos {
     }
 
     public record UserResponse(Long id, String username, String email, String displayName, String role,
-                               String bio, java.time.Instant createdAt, boolean hasAvatar) {
+                               String bio, java.time.Instant createdAt, boolean hasAvatar,
+                               java.util.List<String> roles) {
 
         public static UserResponse from(com.atlante.model.User u) {
             return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getDisplayName(),
-                    u.getRole().name(), u.getBio(), u.getCreatedAt(), u.getAvatarFile() != null);
+                    u.getRoleName(), u.getBio(), u.getCreatedAt(), u.getAvatarFile() != null, u.getRoleNames());
         }
     }
 
@@ -63,7 +64,15 @@ public final class Dtos {
     public record DeleteAccountRequest(@NotBlank String password) {
     }
 
-    public record ChangeRoleRequest(@NotNull com.atlante.model.Role role) {
+    /** Ruolo principale da assegnare (USER resta sempre). */
+    public record ChangeRoleRequest(@NotBlank String role) {
+    }
+
+    /** Insieme completo dei ruoli di un utente. */
+    public record AssignRolesRequest(@NotNull java.util.List<String> roles) {
+    }
+
+    public record RoleRequest(@NotBlank @Size(max = 30) String name, @Size(max = 200) String description) {
     }
 
     public record UserStats(long connections, long likesReceived, long comments,
@@ -137,7 +146,7 @@ public final class Dtos {
                     c.getCategory().getName(), c.getCategory().getSlug(), c.getCriticalNote(),
                     c.getAuthor() != null ? c.getAuthor().getDisplayName() : null,
                     c.getAuthor() != null ? c.getAuthor().getUsername() : null,
-                    c.getAuthor() != null ? c.getAuthor().getRole().name() : null,
+                    c.getAuthor() != null ? c.getAuthor().getRoleName() : null,
                     c.getCreatedAt(), c.getViewCount(), likeCount, likedByMe, commentCount,
                     c.getSourceImageUrl(), c.getTargetImageUrl(),
                     c.getSourcePalette(), c.getTargetPalette());

@@ -39,7 +39,7 @@ public class ConversationController {
         User recipient = userService.findByUsername(request.recipientUsername());
         Conversation conv = chatService.findOrCreate(user, recipient);
         return new ConversationSummary(conv.getId(), recipient.getUsername(), recipient.getDisplayName(),
-                recipient.getRole().name(), 0, null, null, false);
+                recipient.getRoleName(), 0, null, null, false);
     }
 
     @GetMapping("/conversations")
